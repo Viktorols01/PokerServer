@@ -1,4 +1,4 @@
-package comms;
+package test;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -25,5 +25,10 @@ public class TestClient {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void main(String[] args) {
+        TestClient client = new TestClient();
+        client.testConnect();
     }
 }

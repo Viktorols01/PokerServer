@@ -1,5 +1,10 @@
 Protocol:
+    client->server:
+        connect
 
-client->server:
-    connect
-    
+Card codes:
+    H - hearts
+    D - diamonds
+    S - spades
+    C - clubs
+    Interval: (1-13)
