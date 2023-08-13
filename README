@@ -8,3 +8,32 @@ Card codes:
     S - spades
     C - clubs
     Interval: (1-13)
+
+PokerState:
+    2 (amount of players)
+    Jonathan (name)
+    900 (markers)
+    100 (betted markers)
+    small (small/big/none blind)
+    false (have you folded?)
+    true (is it your turn?)
+    false (is this you?)
+    none (player card)
+    none
+    Viktor
+    700
+    300
+    big
+    false
+    false
+    true
+    S3
+    S4
+
+    3 (amount of cards)
+    S2 (community card)
+    H4
+    D6
+
+    300 (pot)
+    50 (small blind)

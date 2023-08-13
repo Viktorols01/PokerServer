@@ -1,8 +1,9 @@
 package poker;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
-public class CardCollection {
+public class CardCollection implements Iterable<Card> {
     protected ArrayList<Card> cards;
 
     public CardCollection() {
@@ -25,7 +26,16 @@ public class CardCollection {
         cards.add(card);
     }
 
+    public Card get(int i) {
+        return cards.get(i);
+    }
+
     public int size() {
         return cards.size();
+    }
+
+    @Override
+    public Iterator<Card> iterator() {
+        return cards.iterator();
     }
 }
