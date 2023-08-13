@@ -1,8 +1,7 @@
 package test;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
+import java.util.Random;
 import java.util.Scanner;
 
 import comms.Connection;
@@ -14,7 +13,7 @@ public class TestClient {
 
     PokerModel model;
 
-    boolean auto = false;
+    boolean auto = true;
 
     public TestClient() {
         int port = 50160;
@@ -22,14 +21,23 @@ public class TestClient {
         this.connection = new Connection(address);
     }
 
-    public void printMessages() {
+    public void readCommands() {
         while (true) {
             Protocol.Command command = Protocol.readCommand(connection);
             switch (command) {
                 case REQUEST_NAME:
                     System.out.println("Name requested.");
-                    Protocol.sendPackage(Protocol.Command.SEND_NAME, new String[] { "TestClient" }, connection);
                     System.out.println("Asking for name...");
+                    if (auto) {
+                        int n = new Random().nextInt(99);
+                        Protocol.sendPackage(Protocol.Command.SEND_NAME, new String[] { ("TestClient " + n) }, connection);
+                    } else {
+                        System.out.println("Enter a name:");
+                        Scanner scanner = new Scanner(System.in);
+                        String name = scanner.nextLine();
+                        Protocol.sendPackage(Protocol.Command.SEND_NAME, new String[] { name }, connection);
+                    }
+                    System.out.println("Asking to be a player...");
                     Protocol.sendPackage(Protocol.Command.SEND_TYPE, new String[] { "player" }, connection);
                     break;
                 case REQUEST_MOVE:
@@ -42,15 +50,18 @@ public class TestClient {
                         String move = scanner.nextLine();
                         switch (move) {
                             case "check":
-                                Protocol.sendPackage(Protocol.Command.SEND_MOVE, new String[] { "check", "0" }, connection);
+                                Protocol.sendPackage(Protocol.Command.SEND_MOVE, new String[] { "check", "0" },
+                                        connection);
                                 break;
                             case "raise":
                                 System.out.println("Raise amount:");
                                 String n = scanner.nextLine();
-                                Protocol.sendPackage(Protocol.Command.SEND_MOVE, new String[] { "raise", n }, connection);
+                                Protocol.sendPackage(Protocol.Command.SEND_MOVE, new String[] { "raise", n },
+                                        connection);
                                 break;
                             default:
-                                Protocol.sendPackage(Protocol.Command.SEND_MOVE, new String[] { "fold", "0" }, connection);
+                                Protocol.sendPackage(Protocol.Command.SEND_MOVE, new String[] { "fold", "0" },
+                                        connection);
                                 break;
                         }
                     }
@@ -89,6 +100,6 @@ public class TestClient {
 
     public static void main(String[] args) {
         TestClient client = new TestClient();
-        client.printMessages();
+        client.readCommands();
     }
 }

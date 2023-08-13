@@ -34,6 +34,17 @@ public class CardCollection implements Iterable<Card> {
         return cards.size();
     }
 
+    public static CardCollection join(CardCollection c1, CardCollection c2) {
+        CardCollection c = new CardCollection();
+        for (Card card : c1) {
+            c.add(card);
+        }
+        for (Card card : c2) {
+            c.add(card);
+        }
+        return c;
+    }
+
     @Override
     public Iterator<Card> iterator() {
         return cards.iterator();

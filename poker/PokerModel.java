@@ -89,6 +89,8 @@ public class PokerModel {
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
+        str.append("---");
+        str.append("\n");
         str.append("PokerState: ");
         str.append("\n");
         str.append("Players: ");
@@ -112,6 +114,8 @@ public class PokerModel {
         }
         str.append("\n");
         str.append("Your markers: " + you.getMarkers() + " (" + you.getBettedMarkers() + ")");
+        str.append("\n");
+        str.append("---");
         return str.toString();
     }
 }

@@ -8,6 +8,7 @@ import comms.Protocol;
 import poker.cards.Card;
 import poker.cards.CardCollection;
 import poker.cards.Deck;
+import poker.cards.HandRanker;
 
 public class TexasHoldEm {
     private PokerServer server;
@@ -44,7 +45,7 @@ public class TexasHoldEm {
 
     private void start() {
         this.deck = new Deck();
-        this.deck.shuffle(0);
+        this.deck.shuffle();
         this.communityCards = new CardCollection();
         this.discardPile = new CardCollection();
 
@@ -58,7 +59,6 @@ public class TexasHoldEm {
             player.getPlayerData().getHand().add(deck.draw());
             player.getPlayerData().getHand().add(deck.draw());
         }
-        sendGameInfo();
     }
 
     private void setupBlinds() {
@@ -87,14 +87,13 @@ public class TexasHoldEm {
                     break;
             }
         }
-        sendGameInfo();
     }
 
     private void getBets() {
         for (PokerPlayer player : players) {
             this.next = player;
             sendGameInfo();
-            if (player.getPlayerData().hasFolded()) {
+            if (player.getPlayerData().hasFolded() || player.getPlayerData().getMarkers() == this.minBet) {
                 continue;
             }
             System.out.println("Requesting move from " + player.getConnection().getName());
@@ -158,7 +157,6 @@ public class TexasHoldEm {
                 this.pot += player.getPlayerData().emptyBettedMarkers();
             }
             this.minBet = 0;
-            sendGameInfo();
         } else {
             getBets();
         }
@@ -169,23 +167,38 @@ public class TexasHoldEm {
         this.communityCards.add(deck.draw());
         this.communityCards.add(deck.draw());
         this.communityCards.add(deck.draw());
-        sendGameInfo();
     }
 
     private void turn() {
         this.discardPile.add(deck.draw());
         this.communityCards.add(deck.draw());
-        sendGameInfo();
     }
 
     private void river() {
         this.discardPile.add(deck.draw());
         this.communityCards.add(deck.draw());
-        sendGameInfo();
     }
 
     private void determineWinner() {
         sendGameInfo();
+        PokerPlayer winner = null;
+        int maxValue = 0;
+        for (PokerPlayer player : players) {
+            CardCollection hand = CardCollection.join(communityCards, player.getPlayerData().getHand());
+            int value = HandRanker.rank(hand);
+            if (value > maxValue) {
+                winner = player;
+                maxValue = value;
+            }
+        }
+        winner.getPlayerData().giveMarkers(this.pot);
+        this.pot = 0;
+        for (int i = players.size() - 1; i >= 0; i--) {
+            PokerPlayer player = players.get(i);
+            if (player.getPlayerData().getMarkers() == 0) {
+                players.remove(player);
+            }
+        }
     }
 
     private String[] toPokerState(Connection connection) {

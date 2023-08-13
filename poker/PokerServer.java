@@ -21,7 +21,9 @@ public class PokerServer extends Server {
     public void start() {
         this.game = new TexasHoldEm(this);
         this.gameThread = new Thread(() -> {
-            game.round();
+            while (true) {
+                game.round();
+            }
         }, "gameThread");
         this.gameThread.start();
     }
