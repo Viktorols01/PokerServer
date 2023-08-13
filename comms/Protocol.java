@@ -16,6 +16,9 @@ public class Protocol {
 
         SEND_POKERSTATE,
 
+        REQUEST_MOVE,
+        SEND_MOVE,
+
         ACCEPTED,
         DENIED,
 
@@ -23,7 +26,12 @@ public class Protocol {
     }
 
     public static Command readCommand(Connection connection) {
-        Command command = Command.valueOf(connection.receive().toUpperCase());
+        Command command;
+        try {
+            command = Command.valueOf(connection.nextLine().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            command = Command.UNKNOWN_COMMAND;
+        }
         return command;
     }
 
@@ -33,30 +41,28 @@ public class Protocol {
                 return new String[] {};
             case SEND_NAME:
             {
-                String name = connection.receive();
+                String name = connection.nextLine();
                 return new String[] { name };
             }
             case SEND_TYPE:
-                String type = connection.receive();
+                String type = connection.nextLine();
                 return new String[] { type };
 
             case SEND_POKERSTATE: 
-                String playercount = connection.receive();
-                String cardcount = connection.receive();
-
                 Stack<String> arguments = new Stack<String>();
 
+                String playercount = connection.nextLine();
                 arguments.push(playercount);
                 for (int i = 0; i < Integer.valueOf(playercount); i++) {
-                    String name = connection.receive();
-                    String markers = connection.receive();
-                    String bettedMarkers = connection.receive();
-                    String blind = connection.receive();
-                    String folded = connection.receive();
-                    String yourturn = connection.receive();
-                    String you = connection.receive();
-                    String card1 = connection.receive();
-                    String card2 = connection.receive();
+                    String name = connection.nextLine();
+                    String markers = connection.nextLine();
+                    String bettedMarkers = connection.nextLine();
+                    String blind = connection.nextLine();
+                    String folded = connection.nextLine();
+                    String yourturn = connection.nextLine();
+                    String you = connection.nextLine();
+                    String card1 = connection.nextLine();
+                    String card2 = connection.nextLine();
                     arguments.push(name);
                     arguments.push(markers);
                     arguments.push(bettedMarkers);
@@ -68,23 +74,34 @@ public class Protocol {
                     arguments.push(card2);
                 }
 
+                String cardcount = connection.nextLine();
                 arguments.push(cardcount);
                 for (int i = 0; i < Integer.valueOf(cardcount); i++) {
-                    String card = connection.receive();
+                    String card = connection.nextLine();
                     arguments.push(card);
                 }
 
-                String pot = connection.receive();
-                String blind = connection.receive();
+                String pot = connection.nextLine();
+                String blind = connection.nextLine();
+                String minBet = connection.nextLine();
                 arguments.push(pot);
                 arguments.push(blind);
+                arguments.push(minBet);
 
-                return (String[])arguments.toArray();
+                return arguments.toArray(String[]::new);
+            
+            case REQUEST_MOVE:
+                return new String[] {};
 
+            case SEND_MOVE:
+                String move = connection.nextLine();
+                String amount = connection.nextLine();
+                return new String[] {move, amount};
+            
             case ACCEPTED:
                 return new String[] {};
             case DENIED:
-                String reason = connection.receive();
+                String reason = connection.nextLine();
                 return new String[] { reason };
             case UNKNOWN_COMMAND:
                 return new String[] {};

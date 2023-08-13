@@ -49,6 +49,12 @@ public class PokerServer extends Server {
                 }
                 break;
             default:
+                System.out.println("Unknown command received:");
+                String[] arguments = Protocol.readArguments(command, connection);
+                System.out.println(command);
+                for (String str : arguments) {
+                    System.out.println(str);
+                }
                 Protocol.sendPackage(Protocol.Command.UNKNOWN_COMMAND, new String[0], connection);
                 break;
         }
@@ -63,7 +69,7 @@ public class PokerServer extends Server {
         StringBuilder str = new StringBuilder(super.toString());
         str.append("Players:" + "\n");
         for (PokerPlayer player : players) {
-            str.append(player.getName() + ": " + player.getMarkers() + " markers \n");
+            str.append(player.getName() + ": " + player.getPlayerData().getMarkers() + " markers \n");
         }
         return str.toString();
     }

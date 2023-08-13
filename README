@@ -37,3 +37,8 @@ PokerState:
 
     300 (pot)
     50 (small blind)
+    100 (minimum bet)
+
+String values:
+    Blind: (none/small/big)
+    Move: (check/raise/fold)

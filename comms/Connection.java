@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Scanner;
 
@@ -35,6 +36,21 @@ public class Connection {
         }
     }
 
+    public Connection(InetSocketAddress address) {
+        try {
+            this.socket = new Socket();
+            this.socket.connect(address);
+            this.outStream = socket.getOutputStream();
+            this.outStreamWriter = new OutputStreamWriter(outStream);
+            this.bufferedWriter = new BufferedWriter(outStreamWriter);
+
+            this.inStream = socket.getInputStream();
+            this.scanner = new Scanner(inStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void write(String message) {
         try {
             bufferedWriter.write(message);
@@ -45,7 +61,7 @@ public class Connection {
         }
     }
 
-    public String receive() {
+    public String nextLine() {
         return scanner.nextLine();
     }
 

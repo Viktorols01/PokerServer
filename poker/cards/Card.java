@@ -1,4 +1,4 @@
-package poker;
+package poker.cards;
 
 public class Card {
     private final Color color;

@@ -1,4 +1,4 @@
-package poker;
+package poker.cards;
 
 import java.util.ArrayList;
 import java.util.Iterator;
