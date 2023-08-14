@@ -1,12 +1,12 @@
+package server;
 import java.util.Scanner;
 
-import poker.PokerServer;
+import game.PokerServer;
 
-class Main {
+class ServerRunner {
     public static void main(String[] args) {
-        PokerServer server = new PokerServer();
+        PokerServer server = new PokerServer(50160);
         server.openConnections();
-        
         Scanner scanner = new Scanner(System.in);
         loop:
         while (true) {

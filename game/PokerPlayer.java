@@ -1,7 +1,7 @@
-package poker;
+package game;
 
 import comms.Connection;
-import poker.cards.PlayerData;
+import poker.PlayerData;
 
 public class PokerPlayer {
     private Connection connection;

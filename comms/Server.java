@@ -11,22 +11,19 @@ import java.util.List;
 import comms.Connection.Type;
 
 public abstract class Server {
-    private ServerSocket serversocket;
-    private List<Connection> connections;
-    private boolean open;
+    protected ServerSocket serversocket;
+    protected List<Connection> connections;
+    protected boolean open;
 
-    private Thread joinListener;
-    private List<Thread> connectionListeners;
+    protected Thread joinListener;
 
-    public Server() {
+    public Server(int port) {
         try {
-            this.serversocket = new ServerSocket(50160);
+            this.serversocket = new ServerSocket(port);
+            this.connections = Collections.synchronizedList(new ArrayList<Connection>());
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.connections = Collections.synchronizedList(new ArrayList<Connection>());
-
-        this.connectionListeners = Collections.synchronizedList(new ArrayList<Thread>());
     }
 
     public void openConnections() {
@@ -44,10 +41,10 @@ public abstract class Server {
         this.open = false;
         this.joinListener.interrupt();
         System.out.println("Listening for connections closed.");
-       
+
     }
 
-    private void joinListen() {
+    protected void joinListen() {
         try {
             Socket socket;
             socket = serversocket.accept();
@@ -57,7 +54,7 @@ public abstract class Server {
 
             if (!this.open) {
                 rejectConnection(connection, socket.getInetAddress().getHostAddress()
-                            + " tried to connect but server is closed.");
+                        + " tried to connect but server is closed.");
                 return;
             }
 
@@ -82,7 +79,6 @@ public abstract class Server {
                     rejectConnection(connection, socket.getInetAddress().getHostAddress()
                             + " tried to connect but didn't supply a name.");
                 }
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -91,28 +87,18 @@ public abstract class Server {
         }
     }
 
-    private void listen(Connection connection) {
-        Protocol.Command command = Protocol.readCommand(connection);
-        readCommand(connection, command);
-    }
-
-    protected abstract void readCommand(Connection connection, Protocol.Command command);
-
-    private void addConnection(Connection connection, String name) {
+    protected void addConnection(Connection connection, String name) {
         connection.setName(name);
         connections.add(connection);
-        Thread thread = new Thread(() -> {
-            listen(connection);
-        });
-        thread.start();
-        connectionListeners.add(thread);
         System.out
                 .println(connection.getSocket().getInetAddress().getHostAddress() + " connected as " + name
                         + ".");
         Protocol.sendPackage(Protocol.Command.ACCEPTED, new String[0], connection);
     }
 
-    private static void rejectConnection(Connection connection, String reason) {
+    protected static void rejectConnection(Connection connection, String reason) {
+        System.out
+                .println(connection.getSocket().getInetAddress().getHostAddress() + " was rejected.");
         Protocol.sendPackage(Protocol.Command.DENIED, new String[] { reason }, connection);
         connection.close();
     }
@@ -123,7 +109,11 @@ public abstract class Server {
         Protocol.sendPackage(Protocol.Command.ACCEPTED, new String[] {}, connection);
     }
 
-    public int getLocalPort() {
+    public String getIP() {
+        return this.getInetAddress().getHostName();
+    }
+
+    public int getPort() {
         return serversocket.getLocalPort();
     }
 
@@ -138,8 +128,8 @@ public abstract class Server {
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
-        str.append("IP: " + getInetAddress() + "\n");
-        str.append("Port: " + getLocalPort() + "\n");
+        str.append("IP: " + getIP() + "\n");
+        str.append("Port: " + getPort() + "\n");
         str.append("Connected clients:" + "\n");
         for (Connection connection : connections) {
             str.append(connection.getIP() + ": " + connection.getName() + "\n");

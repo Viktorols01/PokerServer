@@ -1,4 +1,4 @@
-package poker.cards;
+package poker;
 
 public class PlayerData {
     private String name;
@@ -55,9 +55,15 @@ public class PlayerData {
         return n;
     }
 
-    public int emptyBettedMarkers() {
-        int n = this.bettedMarkers;
-        this.bettedMarkers = 0;
+    public int takeBettedMarkers(int n) {
+        if (n > this.bettedMarkers) {
+            n = this.bettedMarkers;
+            this.bettedMarkers = 0;
+        } else if (n < 0) {
+            n = 0;
+        } else {
+            this.bettedMarkers -= n;
+        }
         return n;
     }
 

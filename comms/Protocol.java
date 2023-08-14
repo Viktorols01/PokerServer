@@ -12,6 +12,7 @@ public class Protocol {
         REQUEST_NAME,
         SEND_NAME,
 
+        REQUEST_TYPE,
         SEND_TYPE,
 
         SEND_POKERSTATE,
@@ -81,10 +82,8 @@ public class Protocol {
                     arguments.push(card);
                 }
 
-                String pot = connection.nextLine();
                 String blind = connection.nextLine();
                 String minBet = connection.nextLine();
-                arguments.push(pot);
                 arguments.push(blind);
                 arguments.push(minBet);
 

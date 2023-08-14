@@ -1,9 +1,9 @@
-package poker.cards;
+package poker;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class CardCollection implements Iterable<Card> {
+public class CardCollection implements Iterable<Card>, Cloneable {
     protected ArrayList<Card> cards;
 
     public CardCollection() {
@@ -34,6 +34,17 @@ public class CardCollection implements Iterable<Card> {
         return cards.size();
     }
 
+    public void sortHighToLow() {
+        this.cards.sort((Card c1, Card c2) -> {
+            int d = c2.getValue() - c1.getValue();
+            if (d == 0) {
+                return c2.getColor().ordinal() - c1.getColor().ordinal();
+            } else {
+                return d;
+            }
+        });
+    }
+
     public static CardCollection join(CardCollection c1, CardCollection c2) {
         CardCollection c = new CardCollection();
         for (Card card : c1) {
@@ -48,5 +59,14 @@ public class CardCollection implements Iterable<Card> {
     @Override
     public Iterator<Card> iterator() {
         return cards.iterator();
+    }
+
+    @Override 
+    public CardCollection clone() {
+        CardCollection clone = new CardCollection();
+        for (Card c : this.cards) {
+            clone.add(c);
+        }
+        return clone;
     }
 }

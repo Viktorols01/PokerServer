@@ -2,17 +2,12 @@ package poker;
 
 import java.util.ArrayList;
 
-import poker.cards.Card;
-import poker.cards.CardCollection;
-import poker.cards.PlayerData;
-
 public class PokerModel {
     ArrayList<PlayerData> players;
     PlayerData next;
     PlayerData you;
     CardCollection communityCards;
 
-    int pot;
     int smallBlind;
     int minBet;
 
@@ -53,7 +48,6 @@ public class PokerModel {
             this.communityCards.add(new Card(arguments[j++]));
         }
 
-        this.pot = Integer.valueOf(arguments[j++]);
         this.smallBlind = Integer.valueOf(arguments[j++]);
         this.minBet = Integer.valueOf(arguments[j++]);
     }
@@ -75,6 +69,10 @@ public class PokerModel {
     }
 
     public int getPot() {
+        int pot = 0;
+        for (PlayerData player : players) {
+            pot += player.getBettedMarkers();
+        }
         return pot;
     }
 
@@ -93,13 +91,19 @@ public class PokerModel {
         str.append("\n");
         str.append("PokerState: ");
         str.append("\n");
+        str.append("Name: " + you.getName());
+        str.append("\n");
         str.append("Players: ");
         for (PlayerData player : players) {
             str.append("\n\t");
-            str.append(player.getName() + ": " + player.getMarkers() + " (" + player.getBettedMarkers() + ")");
+            if (player == you) {
+                str.append(player.getName() + ": " + player.getMarkers() + " (" + player.getBettedMarkers() + ")");
+            } else {
+                str.append("You" + ": " + player.getMarkers() + " (" + player.getBettedMarkers() + ")");
+            }
         }
         str.append("\n");
-        str.append("Pot: " + this.pot);
+        str.append("Pot: " + this.getPot());
         str.append("\n");
         str.append("Community cards: ");
         for (Card card : communityCards) {
@@ -107,7 +111,7 @@ public class PokerModel {
             str.append(card);
         }
         str.append("\n");
-        str.append("Your hand: ");
+        str.append("Your hand: " + HandRank.rank(CardCollection.join(you.getHand(), communityCards)));
         for (Card card : you.getHand()) {
             str.append("\n\t");
             str.append(card);

@@ -1,14 +1,14 @@
-package poker;
+package game;
 
 import java.util.List;
 import java.util.Stack;
 
 import comms.Connection;
 import comms.Protocol;
-import poker.cards.Card;
-import poker.cards.CardCollection;
-import poker.cards.Deck;
-import poker.cards.HandRanker;
+import poker.Card;
+import poker.CardCollection;
+import poker.Deck;
+import poker.HandRank;
 
 public class TexasHoldEm {
     private PokerServer server;
@@ -19,7 +19,6 @@ public class TexasHoldEm {
     private CardCollection communityCards;
     private CardCollection discardPile;
 
-    private int pot;
     private int smallBlind;
     private int minBet;
 
@@ -49,7 +48,6 @@ public class TexasHoldEm {
         this.communityCards = new CardCollection();
         this.discardPile = new CardCollection();
 
-        this.pot = 0;
         this.smallBlind = 50;
         this.minBet = smallBlind * 2;
     }
@@ -90,7 +88,11 @@ public class TexasHoldEm {
     }
 
     private void getBets() {
-        for (PokerPlayer player : players) {
+        int betsRemaining = players.size();
+        int playerCount = players.size();
+        int i = 0;
+        while (betsRemaining > 0) {
+            PokerPlayer player = players.get(i%playerCount);
             this.next = player;
             sendGameInfo();
             if (player.getPlayerData().hasFolded() || player.getPlayerData().getMarkers() == this.minBet) {
@@ -109,31 +111,23 @@ public class TexasHoldEm {
                 switch (move) {
                     case "check": {
                         int remaining = this.minBet - player.getPlayerData().getBettedMarkers();
-                        if (remaining == 0) {
-                            Protocol.sendPackage(Protocol.Command.ACCEPTED, new String[] {}, player.getConnection());
-                        }
-                        if (player.getPlayerData().getMarkers() >= remaining) {
-                            player.getPlayerData().bet(remaining);
-                            Protocol.sendPackage(Protocol.Command.ACCEPTED, new String[] {}, player.getConnection());
-                        } else {
-                            player.getPlayerData().setFolded(true);
-                            Protocol.sendPackage(Protocol.Command.DENIED, new String[] { "Can't afford checking" },
-                                    player.getConnection());
-                        }
+                        player.getPlayerData().bet(remaining);
+                        Protocol.sendPackage(Protocol.Command.ACCEPTED, new String[] {}, player.getConnection());
                         break;
                     }
                     case "raise": {
                         int remaining = this.minBet - player.getPlayerData().getBettedMarkers();
-                        if (value + remaining <= player.getPlayerData().getMarkers()) {
-                            player.getPlayerData().bet(value + remaining);
-                            this.minBet += value;
-                            Protocol.sendPackage(Protocol.Command.ACCEPTED, new String[] {}, player.getConnection());
-                        } else {
-                            player.getPlayerData().setFolded(true);
-                            Protocol.sendPackage(Protocol.Command.DENIED, new String[] { "Can't afford raising" },
-                                    player.getConnection());
+                        int n = player.getPlayerData().bet(value + remaining);
+                        if (n > remaining) {
+                            this.minBet += n - remaining;
+                            betsRemaining += (playerCount - 1);
                         }
+                        Protocol.sendPackage(Protocol.Command.ACCEPTED, new String[] {}, player.getConnection());
                         break;
+                    }
+                    case "fold": {
+                        player.getPlayerData().setFolded(true);
+                        Protocol.sendPackage(Protocol.Command.ACCEPTED, new String[] {}, player.getConnection());
                     }
                     default:
                         player.getPlayerData().setFolded(true);
@@ -145,20 +139,8 @@ public class TexasHoldEm {
                 player.getPlayerData().setFolded(true);
                 Protocol.sendPackage(Protocol.Command.DENIED, new String[] { "Wrong command" }, player.getConnection());
             }
-        }
-        boolean done = true;
-        for (PokerPlayer player : players) {
-            if (player.getPlayerData().getBettedMarkers() != this.minBet && !player.getPlayerData().hasFolded()) {
-                done = false;
-            }
-        }
-        if (done) {
-            for (PokerPlayer player : players) {
-                this.pot += player.getPlayerData().emptyBettedMarkers();
-            }
-            this.minBet = 0;
-        } else {
-            getBets();
+            betsRemaining--;
+            i++;
         }
     }
 
@@ -182,22 +164,38 @@ public class TexasHoldEm {
     private void determineWinner() {
         sendGameInfo();
         PokerPlayer winner = null;
-        int maxValue = 0;
+        HandRank maxRank = new HandRank();
         for (PokerPlayer player : players) {
+            if (player.getPlayerData().getBettedMarkers() == 0) {
+                continue;
+            }
             CardCollection hand = CardCollection.join(communityCards, player.getPlayerData().getHand());
-            int value = HandRanker.rank(hand);
-            if (value > maxValue) {
+            HandRank rank = HandRank.rank(hand);
+            if (rank.greaterThan(maxRank)) {
                 winner = player;
-                maxValue = value;
+                maxRank = rank;
             }
         }
-        winner.getPlayerData().giveMarkers(this.pot);
-        this.pot = 0;
-        for (int i = players.size() - 1; i >= 0; i--) {
-            PokerPlayer player = players.get(i);
-            if (player.getPlayerData().getMarkers() == 0) {
-                players.remove(player);
+        for (PokerPlayer player : players) {
+            winner.getPlayerData().giveMarkers(player.getPlayerData().takeBettedMarkers(winner.getPlayerData().getBettedMarkers()));
+        }
+
+        boolean done = true;
+        for (PokerPlayer player : players) {
+            if (player.getPlayerData().getBettedMarkers() > 0) {
+                done = false;
             }
+        }
+        
+        if (done) {
+            for (int i = players.size() - 1; i >= 0; i--) {
+                PokerPlayer player = players.get(i);
+                if (player.getPlayerData().getMarkers() == 0) {
+                    players.remove(player);
+                }
+            }
+        } else {
+            determineWinner();
         }
     }
 
@@ -243,7 +241,6 @@ public class TexasHoldEm {
             arguments.push(cardcode);
         }
 
-        arguments.push(Integer.toString(pot));
         arguments.push(Integer.toString(smallBlind));
         arguments.push(Integer.toString(minBet));
 

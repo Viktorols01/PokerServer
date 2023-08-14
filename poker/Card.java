@@ -1,4 +1,4 @@
-package poker.cards;
+package poker;
 
 public class Card {
     private final Color color;
@@ -34,30 +34,13 @@ public class Card {
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
-        str.append("\u001b[47m");
-        switch (this.color) {
-            case HEARTS:
-                str.append("\u001b[31m");
-                break;
-            case DIAMONDS:
-                str.append("\u001b[31m");
-                break;
-            case SPADES:
-                str.append("\u001b[30m");
-                break;
-            case CLUBS:
-                str.append("\u001b[30m");
-                break;
-        }
         str.append(this.color.name());
-        str.append("\u001b[30m");
         str.append(" ");
         str.append(this.value);
-        str.append("\u001b[0m");
         return str.toString();
     }
 
-    enum Color {
+    public enum Color {
         HEARTS,
         DIAMONDS,
         SPADES,
