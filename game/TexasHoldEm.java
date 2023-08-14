@@ -47,6 +47,7 @@ public class TexasHoldEm {
         this.deck.shuffle();
         this.communityCards = new CardCollection();
         this.discardPile = new CardCollection();
+        resetPlayers();
 
         this.smallBlind = 50;
         this.minBet = smallBlind * 2;
@@ -69,6 +70,13 @@ public class TexasHoldEm {
             } else {
                 player.getPlayerData().setBlind("none");
             }
+        }
+    }
+
+    private void resetPlayers() {
+        for (PokerPlayer player : players) {
+            player.getPlayerData().getHand().empty();
+            player.getPlayerData().setFolded(false);
         }
     }
 
@@ -95,13 +103,15 @@ public class TexasHoldEm {
             PokerPlayer player = players.get(i%playerCount);
             this.next = player;
             sendGameInfo();
-            if (player.getPlayerData().hasFolded() || player.getPlayerData().getMarkers() == this.minBet) {
+            if (player.getPlayerData().hasFolded()) {
+                betsRemaining--;
                 continue;
             }
             System.out.println("Requesting move from " + player.getConnection().getName());
             Protocol.sendPackage(Protocol.Command.REQUEST_MOVE, new String[] {}, player.getConnection());
             Protocol.Command command = Protocol.readCommand(player.getConnection());
             System.out.println("Got: " + command + " from " + player.getConnection().getName());
+            
             if (command == Protocol.Command.SEND_MOVE) {
                 String[] arguments = Protocol.readArguments(command, player.getConnection());
                 String move = arguments[0];
@@ -162,11 +172,10 @@ public class TexasHoldEm {
     }
 
     private void determineWinner() {
-        sendGameInfo();
         PokerPlayer winner = null;
         HandRank maxRank = new HandRank();
         for (PokerPlayer player : players) {
-            if (player.getPlayerData().getBettedMarkers() == 0) {
+            if (player.getPlayerData().hasFolded() || player.getPlayerData().getBettedMarkers() == 0) {
                 continue;
             }
             CardCollection hand = CardCollection.join(communityCards, player.getPlayerData().getHand());
@@ -176,8 +185,9 @@ public class TexasHoldEm {
                 maxRank = rank;
             }
         }
+        int win = winner.getPlayerData().getBettedMarkers();
         for (PokerPlayer player : players) {
-            winner.getPlayerData().giveMarkers(player.getPlayerData().takeBettedMarkers(winner.getPlayerData().getBettedMarkers()));
+            winner.getPlayerData().giveMarkers(player.getPlayerData().takeBettedMarkers(win));
         }
 
         boolean done = true;
@@ -188,6 +198,7 @@ public class TexasHoldEm {
         }
         
         if (done) {
+            sendGameInfo();
             for (int i = players.size() - 1; i >= 0; i--) {
                 PokerPlayer player = players.get(i);
                 if (player.getPlayerData().getMarkers() == 0) {
@@ -195,6 +206,7 @@ public class TexasHoldEm {
                 }
             }
         } else {
+            sendGameInfo();
             determineWinner();
         }
     }

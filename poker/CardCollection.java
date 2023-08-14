@@ -69,4 +69,8 @@ public class CardCollection implements Iterable<Card>, Cloneable {
         }
         return clone;
     }
+
+    public void empty() {
+        this.cards = new ArrayList<Card>();
+    }
 }

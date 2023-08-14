@@ -96,14 +96,20 @@ public class PokerModel {
         str.append("Players: ");
         for (PlayerData player : players) {
             str.append("\n\t");
-            if (player == you) {
-                str.append(player.getName() + ": " + player.getMarkers() + " (" + player.getBettedMarkers() + ")");
-            } else {
-                str.append("You" + ": " + player.getMarkers() + " (" + player.getBettedMarkers() + ")");
+            if (player.hasFolded()) {
+                str.append("\u001b[2m");
             }
+            if (player == you) {
+                str.append("You" + ": " + player.getMarkers() + " (" + player.getBettedMarkers() + ")");
+            } else {
+                str.append(player.getName() + ": " + player.getMarkers() + " (" + player.getBettedMarkers() + ")");
+            }
+            str.append("\u001b[0m");
         }
         str.append("\n");
         str.append("Pot: " + this.getPot());
+        str.append("\n");
+        str.append("Need to bet: " + (this.minBet - you.getBettedMarkers()));
         str.append("\n");
         str.append("Community cards: ");
         for (Card card : communityCards) {
