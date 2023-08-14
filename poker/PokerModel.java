@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class PokerModel {
     ArrayList<PlayerData> players;
-    PlayerData next;
+    PlayerData toPlay;
     PlayerData you;
     CardCollection communityCards;
 
@@ -35,7 +35,7 @@ public class PokerModel {
             PlayerData player = new PlayerData(name, hand, markers, bettedmarkers, folded, blind);
             this.players.add(player);
             if (yourturn) {
-                this.next = player;
+                this.toPlay = player;
             }
             if (you) {
                 this.you = player;
@@ -56,8 +56,8 @@ public class PokerModel {
         return players;
     }
 
-    public PlayerData getNext() {
-        return next;
+    public PlayerData getToPlay() {
+        return toPlay;
     }
 
     public PlayerData getYou() {
@@ -99,17 +99,18 @@ public class PokerModel {
             if (player.hasFolded()) {
                 str.append("\u001b[2m");
             }
+            if (player == toPlay) {
+                str.append("\u001b[32m");
+            }
             if (player == you) {
-                str.append("You" + ": " + player.getMarkers() + " (" + player.getBettedMarkers() + ")");
+                str.append("You" + ": " + player.getMarkers() + ":" + player.getBettedMarkers() + " (" + player.getBlind() + " blind)");
             } else {
-                str.append(player.getName() + ": " + player.getMarkers() + " (" + player.getBettedMarkers() + ")");
+                str.append(player.getName() + ": " + player.getMarkers() + ":" + player.getBettedMarkers() + " (" + player.getBlind() + " blind)");
             }
             str.append("\u001b[0m");
         }
         str.append("\n");
         str.append("Pot: " + this.getPot());
-        str.append("\n");
-        str.append("Need to bet: " + (this.minBet - you.getBettedMarkers()));
         str.append("\n");
         str.append("Community cards: ");
         for (Card card : communityCards) {
@@ -122,6 +123,8 @@ public class PokerModel {
             str.append("\n\t");
             str.append(card);
         }
+        str.append("\n");
+        str.append("Need to bet: " + (this.minBet - you.getBettedMarkers()));
         str.append("\n");
         str.append("Your markers: " + you.getMarkers() + " (" + you.getBettedMarkers() + ")");
         str.append("\n");

@@ -20,6 +20,8 @@ public class Protocol {
         REQUEST_MOVE,
         SEND_MOVE,
 
+        SEND_MESSAGE,
+
         ACCEPTED,
         DENIED,
 
@@ -40,8 +42,7 @@ public class Protocol {
         switch (command) {
             case REQUEST_NAME:
                 return new String[] {};
-            case SEND_NAME:
-            {
+            case SEND_NAME: {
                 String name = connection.nextLine();
                 return new String[] { name };
             }
@@ -49,7 +50,7 @@ public class Protocol {
                 String type = connection.nextLine();
                 return new String[] { type };
 
-            case SEND_POKERSTATE: 
+            case SEND_POKERSTATE:
                 Stack<String> arguments = new Stack<String>();
 
                 String playercount = connection.nextLine();
@@ -88,15 +89,19 @@ public class Protocol {
                 arguments.push(minBet);
 
                 return arguments.toArray(String[]::new);
-            
+
             case REQUEST_MOVE:
                 return new String[] {};
 
             case SEND_MOVE:
                 String move = connection.nextLine();
                 String amount = connection.nextLine();
-                return new String[] {move, amount};
-            
+                return new String[] { move, amount };
+
+            case SEND_MESSAGE:
+                String message = connection.nextLine();
+                return new String[] { message };
+
             case ACCEPTED:
                 return new String[] {};
             case DENIED:

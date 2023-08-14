@@ -21,6 +21,7 @@ class ServerRunner {
                     server.closeConnections();
                     break;
                 case "START":
+                    server.closeConnections();
                     server.start();
                     break;
                 case "EXIT":

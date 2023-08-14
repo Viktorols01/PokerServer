@@ -10,7 +10,7 @@ public abstract class PokerBot {
     }
 
     protected static String[] raise(int n) {
-        return new String[] { "check", String.valueOf(n) };
+        return new String[] { "raise", String.valueOf(n) };
     }
 
     protected static String[] fold() {

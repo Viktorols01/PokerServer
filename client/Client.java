@@ -10,30 +10,36 @@ import poker.PokerModel;
 
 public class Client {
     private Connection connection;
+    private Thread thread;
 
     private PokerBot bot;
     private PokerModel model;
-
     private boolean auto;
 
+    private Printer printer;
+
     public Client() {
-        this.bot = new PokerBot() {
-            @Override
-            public String[] getMove(PokerModel model) {
-                return check();
-            }
-        };
         this.auto = false;
+        this.printer = new Printer(true);
     }
 
-    public Client(boolean auto) {
-        this.bot = new PokerBot() {
-            @Override
-            public String[] getMove(PokerModel model) {
-                return check();
-            }
-        };
-        this.auto = auto;
+    public Client(boolean auto, boolean print) {
+        if (auto) {
+            this.bot = new PokerBot() {
+                @Override
+                public String[] getMove(PokerModel model) {
+                    return check();
+                }
+            };
+        }
+        this.auto = true;
+        this.printer = new Printer(print);
+    }
+
+    public Client(PokerBot bot, boolean print) {
+        this.bot = bot;
+        this.auto = true;
+        this.printer = new Printer(print);
     }
 
     public void connect(String ip, int port) {
@@ -42,84 +48,107 @@ public class Client {
     }
 
     public void start() {
-        Scanner scanner = new Scanner(System.in);
-        loop: while (true) {
-            Protocol.Command command = Protocol.readCommand(connection);
-            switch (command) {
-                case REQUEST_NAME:
-                    System.out.println("Name requested.");
-                    System.out.println("Asking for name...");
-                    String name;
-                    if (auto) {
-                        int n = new Random().nextInt(99);
-                        name = ("Client " + n);
-                        Protocol.sendPackage(Protocol.Command.SEND_NAME, new String[] { name }, connection);
-                    } else {
-                        System.out.println("Enter a name:");
-                        name = scanner.nextLine();
-                        Protocol.sendPackage(Protocol.Command.SEND_NAME, new String[] { name }, connection);
-                    }
-                    System.out.println("Asking for name (" + name + ")...");
-                    break;
-                case REQUEST_TYPE:
-                    System.out.println("Type requested.");
-                    System.out.println("Asking for type (player)...");
-                    Protocol.sendPackage(Protocol.Command.SEND_TYPE, new String[] { "player" }, connection);
-                    break;
-                case REQUEST_MOVE:
-                    System.out.println("Move requested.");
-                    if (auto) {
-                        String[] arguments = bot.getMove(model);
-                        Protocol.sendPackage(Protocol.Command.SEND_MOVE, arguments, connection);
-                    } else {
-                        System.out.println("Make a move:");
-                        String input = scanner.nextLine();
-                        String[] split = input.split(" ");
-                        String move = split[0].toLowerCase();
-                        switch (move) {
-                            case "check":
-                                System.out.println("Asking for move (check)...");
-                                Protocol.sendPackage(Protocol.Command.SEND_MOVE, new String[] { "check", "0" },
-                                        connection);
-                                break;
-                            case "raise":
-                                int n = Integer.valueOf(split[1]);
-                                System.out.println("Asking for move (raise " + n + ")...");
-                                Protocol.sendPackage(Protocol.Command.SEND_MOVE,
-                                        new String[] { "raise", String.valueOf(n) },
-                                        connection);
-                                break;
-                            default:
-                                System.out.println("Asking for move (fold)...");
-                                Protocol.sendPackage(Protocol.Command.SEND_MOVE, new String[] { "fold", "0" },
-                                        connection);
-                                break;
+        this.thread = new Thread(() -> {
+            Scanner scanner = new Scanner(System.in);
+            loop: while (true) {
+                Protocol.Command command = Protocol.readCommand(connection);
+                switch (command) {
+                    case REQUEST_NAME:
+                        printer.print("Name requested.");
+                        printer.print("Asking for name...");
+                        String name;
+                        if (auto) {
+                            int n = new Random().nextInt(99);
+                            name = ("Bot " + n);
+                            Protocol.sendPackage(Protocol.Command.SEND_NAME, new String[] { name }, connection);
+                        } else {
+                            System.out.println("Enter a name:");
+                            name = scanner.nextLine();
+                            Protocol.sendPackage(Protocol.Command.SEND_NAME, new String[] { name }, connection);
                         }
+                        printer.print("Asking for name (" + name + ")...");
+                        break;
+                    case REQUEST_TYPE:
+                        printer.print("Type requested.");
+                        printer.print("Asking for type (player)...");
+                        Protocol.sendPackage(Protocol.Command.SEND_TYPE, new String[] { "player" }, connection);
+                        break;
+                    case REQUEST_MOVE:
+                        printer.print("Move requested.");
+                        if (auto) {
+                            String[] arguments = bot.getMove(model);
+                            Protocol.sendPackage(Protocol.Command.SEND_MOVE, arguments, connection);
+                        } else {
+                            System.out.println("Make a move:");
+                            String input = scanner.nextLine();
+                            String[] split = input.split(" ");
+                            String move = split[0].toLowerCase();
+                            switch (move) {
+                                case "check":
+                                    printer.print("Asking for move (check)...");
+                                    Protocol.sendPackage(Protocol.Command.SEND_MOVE, new String[] { "check", "0" },
+                                            connection);
+                                    break;
+                                case "raise":
+                                    int n = Integer.valueOf(split[1]);
+                                    printer.print("Asking for move (raise " + n + ")...");
+                                    Protocol.sendPackage(Protocol.Command.SEND_MOVE,
+                                            new String[] { "raise", String.valueOf(n) },
+                                            connection);
+                                    break;
+                                default:
+                                    printer.print("Asking for move (fold)...");
+                                    Protocol.sendPackage(Protocol.Command.SEND_MOVE, new String[] { "fold", "0" },
+                                            connection);
+                                    break;
+                            }
+                        }
+                        break;
+                    case ACCEPTED:
+                        printer.print("Accepted!");
+                        break;
+                    case DENIED: {
+                        String[] arguments = Protocol.readArguments(command, connection);
+                        printer.print("Denied! (" + arguments[0] + ")");
+                        break;
                     }
-                    break;
-                case ACCEPTED:
-                    System.out.println("Accepted!");
-                    break;
-                case DENIED: {
-                    String[] arguments = Protocol.readArguments(command, connection);
-                    System.out.println("Denied! (" + arguments[0] + ")");
-                    break;
-                }
-                case SEND_POKERSTATE: {
-                    String[] arguments = Protocol.readArguments(command, connection);
-                    this.model = new PokerModel(arguments);
-                    System.out.println(this.model);
-                    break;
-                }
-                default:
-                    String[] arguments = Protocol.readArguments(command, connection);
-                    System.out.println(command);
-                    for (String str : arguments) {
-                        System.out.println(str);
+                    case SEND_POKERSTATE: {
+                        String[] arguments = Protocol.readArguments(command, connection);
+                        this.model = new PokerModel(arguments);
+                        printer.print(this.model.toString());
+                        break;
                     }
-                    break loop;
+                    case SEND_MESSAGE: {
+                        String[] arguments = Protocol.readArguments(command, connection);
+                        String message = arguments[0];
+                        printer.print(message);
+                        break;
+                    }
+                    default:
+                        String[] arguments = Protocol.readArguments(command, connection);
+                        printer.print(command.toString());
+                        for (String str : arguments) {
+                            printer.print(str);
+                        }
+                        break loop;
+                }
+            }
+            scanner.close();
+        });
+        this.thread.start();
+    }
+
+    private class Printer {
+        private boolean print;
+
+        public Printer(boolean print) {
+            this.print = print;
+        }
+
+        public void print(String message) {
+            if (this.print) {
+                System.out.println(message);
             }
         }
-        scanner.close();
     }
 }

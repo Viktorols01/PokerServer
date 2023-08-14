@@ -92,7 +92,7 @@ public class HandRank {
     }
 
     private static HandRank getPair(CardGrid grid) {
-        for (int value = 14; value > 0; value--) {
+        for (int value = 14; value > 1; value--) {
             if (grid.valueCount(value) == 2) {
                 return new HandRank(2, value);
             }
@@ -103,7 +103,7 @@ public class HandRank {
     private static HandRank getTwoPair(CardGrid grid) {
         int pairCounter = 0;
         int maxValue = 0;
-        for (int value = 14; value > 0; value--) {
+        for (int value = 14; value > 1; value--) {
             if (grid.valueCount(value) == 2) {
                 if (value > maxValue) {
                     maxValue = value;
@@ -118,7 +118,7 @@ public class HandRank {
     }
 
     private static HandRank getThreeOfAKind(CardGrid grid) {
-        for (int value = 14; value > 0; value--) {
+        for (int value = 14; value > 1; value--) {
             if (grid.valueCount(value) == 3) {
                 return new HandRank(4, value);
             }
@@ -166,12 +166,12 @@ public class HandRank {
     private static HandRank getFullHouse(CardGrid grid) {
         int tripleValue = 0;
         int doubleValue = 0;
-        for (int value = 14; value > 0; value--) {
+        for (int value = 14; value > 1; value--) {
             if (grid.valueCount(value) == 3) {
                 if (value > tripleValue) {
                     tripleValue = value;
                 }
-            } else if (grid.valueCount(value) == 2) {
+            } else if (grid.valueCount(value) >= 2) {
                 if (value > doubleValue) {
                     doubleValue = value;
                 }
@@ -184,7 +184,7 @@ public class HandRank {
     }
 
     private static HandRank getFourOfAKind(CardGrid grid) {
-        for (int value = 14; value > 0; value--) {
+        for (int value = 14; value > 1; value--) {
             if (grid.valueCount(value) == 4) {
                 return new HandRank(8, value);
             }
@@ -257,36 +257,37 @@ public class HandRank {
         StringBuilder str = new StringBuilder();
         switch (this.value) {
             case 1:
-                str.append("High card " + this.kickerValue);
+                str.append("High card ");
                 break;
             case 2:
-                str.append("Pairs " + this.kickerValue);
+                str.append("Pairs ");
                 break;
             case 3:
-                str.append("Two pairs " + this.kickerValue);
+                str.append("Two pairs ");
                 break;
             case 4:
-                str.append("Three of a kind " + this.kickerValue);
+                str.append("Three of a kind ");
                 break;
             case 5:
-                str.append("Straight " + this.kickerValue);
+                str.append("Straight ");
                 break;
             case 6:
-                str.append("Flush " + this.kickerValue);
+                str.append("Flush ");
                 break;
             case 7:
-                str.append("Full house " + this.kickerValue);
+                str.append("Full house ");
                 break;
             case 8:
-                str.append("Four of a kind " + this.kickerValue);
+                str.append("Four of a kind ");
                 break;
             case 9:
-                str.append("Straight flush " + this.kickerValue);
+                str.append("Straight flush ");
                 break;
             case 10:
-                str.append("Royal flush " + this.kickerValue);
+                str.append("Royal flush ");
                 break;
         }
+        str.append("(" + this.kickerValue + ")");
         return str.toString();
     }
 }
