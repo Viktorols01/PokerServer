@@ -6,9 +6,9 @@
 [x] Om en person inte kan höja, skippa
 [x] Ordningen ska rotera
 
-[] Hittar tvåpar där det inte finns
+[x] Hittar tvåpar där det inte finns
+[x] Split pot
 
-[] Split pot
 [] Jämför samma värde i HandRank
 
 [] GUI

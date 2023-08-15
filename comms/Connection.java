@@ -20,17 +20,12 @@ public class Connection {
     private BufferedWriter bufferedWriter;
 
     private Scanner scanner;
-    
+
     public Connection(Socket socket) {
-        this.socket = socket;
-
         try {
-            this.outStream = socket.getOutputStream();
-            this.outStreamWriter = new OutputStreamWriter(outStream);
-            this.bufferedWriter = new BufferedWriter(outStreamWriter);
+            this.socket = socket;
 
-            this.inStream = socket.getInputStream();
-            this.scanner = new Scanner(inStream);
+            init();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -40,15 +35,31 @@ public class Connection {
         try {
             this.socket = new Socket();
             this.socket.connect(address);
-            this.outStream = socket.getOutputStream();
-            this.outStreamWriter = new OutputStreamWriter(outStream);
-            this.bufferedWriter = new BufferedWriter(outStreamWriter);
 
-            this.inStream = socket.getInputStream();
-            this.scanner = new Scanner(inStream);
+            init();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public Connection(String ip, int port) {
+        try {
+            this.socket = new Socket();
+            this.socket.connect(new InetSocketAddress("localhost", port));
+
+            init();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void init() throws IOException {
+        this.outStream = socket.getOutputStream();
+        this.outStreamWriter = new OutputStreamWriter(outStream);
+        this.bufferedWriter = new BufferedWriter(outStreamWriter);
+
+        this.inStream = socket.getInputStream();
+        this.scanner = new Scanner(inStream);
     }
 
     public void write(String message) {

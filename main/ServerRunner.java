@@ -1,7 +1,7 @@
-package server;
+package main;
 import java.util.Scanner;
 
-import game.PokerServer;
+import server.PokerServer;
 
 class ServerRunner {
     public static void main(String[] args) {

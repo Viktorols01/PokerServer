@@ -3,7 +3,6 @@ package comms;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -44,50 +43,9 @@ public abstract class Server {
 
     }
 
-    protected void joinListen() {
-        try {
-            Socket socket;
-            socket = serversocket.accept();
-            Connection connection = new Connection(socket);
+    protected abstract void joinListen();
 
-            System.out.println(socket.getInetAddress().getHostAddress() + " is trying to connect...");
-
-            if (!this.open) {
-                rejectConnection(connection, socket.getInetAddress().getHostAddress()
-                        + " tried to connect but server is closed.");
-                return;
-            }
-
-            Protocol.sendPackage(Protocol.Command.REQUEST_NAME, new String[0], connection);
-            try {
-                Protocol.Command command = Protocol.readCommand(connection);
-                if (command == Protocol.Command.SEND_NAME) {
-                    String name = Protocol.readArguments(command, connection)[0];
-                    boolean nameTaken = false;
-                    for (Connection c : connections) {
-                        if (c.getName().equals(name)) {
-                            nameTaken = true;
-                        }
-                    }
-                    if (nameTaken) {
-                        rejectConnection(connection, socket.getInetAddress().getHostAddress()
-                                + " tried to connect but " + name + " was taken.");
-                    } else {
-                        addConnection(connection, name);
-                    }
-                } else {
-                    rejectConnection(connection, socket.getInetAddress().getHostAddress()
-                            + " tried to connect but didn't supply a name.");
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    protected void addConnection(Connection connection, String name) {
+    protected final void addConnection(Connection connection, String name) {
         connection.setName(name);
         connections.add(connection);
         System.out
@@ -96,14 +54,14 @@ public abstract class Server {
         Protocol.sendPackage(Protocol.Command.ACCEPTED, new String[0], connection);
     }
 
-    protected static void rejectConnection(Connection connection, String reason) {
+    protected final static void rejectConnection(Connection connection, String reason) {
         System.out
                 .println(connection.getSocket().getInetAddress().getHostAddress() + " was rejected.");
         Protocol.sendPackage(Protocol.Command.DENIED, new String[] { reason }, connection);
         connection.close();
     }
 
-    protected static void setType(Connection connection, Type type) {
+    protected final static void setType(Connection connection, Type type) {
         connection.setType(type);
         System.out.println(connection.getName() + " changed to " + type);
         Protocol.sendPackage(Protocol.Command.ACCEPTED, new String[] {}, connection);

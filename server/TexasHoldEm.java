@@ -1,4 +1,4 @@
-package game;
+package server;
 
 import java.util.List;
 import java.util.Stack;
@@ -147,6 +147,7 @@ public class TexasHoldEm {
                 value = Math.max(0, value);
 
                 switch (move) {
+                    case "match":
                     case "check": {
                         int remaining = this.minBet - player.getPlayerData().getBettedMarkers();
                         player.getPlayerData().bet(remaining);
