@@ -29,7 +29,7 @@ public class TexasHoldEm {
         this.players = server.getPlayers();
         this.smallBlindIndex = 0;
         this.setupBlinds();
-        sendMessage("\u001b[34mWelcome!\u001b[0m");
+        sendMessage("Welcome!");
     }
 
     public void round() {
