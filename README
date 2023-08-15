@@ -1,6 +1,52 @@
-Protocol:
-    client->server:
-        connect
+Protocol commands:
+    COMMAND
+        ARGUMENTS
+
+    REQUEST_NAME
+
+    SEND_NAME
+        (name)
+
+    REQUEST_TYPE
+
+    SEND_TYPE
+        (type)
+
+    SEND_POKERSTATE
+        (amount of players)
+            (name)
+            (markers)
+            (betted markers)
+            (blind)
+            (has player folded)
+            (is it this player's turn)
+            (is this player you)
+            (card 1)
+            (card 2)
+        (amount of community cards)
+            (community card)
+        (small blind)
+        (minimum bet)
+
+    REQUEST_MOVE
+
+    SEND_MOVE
+        (move)
+
+    SEND_MESSAGE
+        (message)
+
+    ACCEPTED
+
+    DENIED
+        (reason)
+
+    UNKNOWN_COMMAND
+
+
+String values:
+    blind: (none/small/big)
+    move: (match/check/raise/fold)
 
 Card codes:
     H - hearts
@@ -8,36 +54,3 @@ Card codes:
     S - spades
     C - clubs
     Interval: (1-13)
-
-PokerState:
-    2 (amount of players)
-    Jonathan (name)
-    900 (markers)
-    100 (betted markers)
-    small (small/big/none blind)
-    false (have you folded?)
-    true (is it your turn?)
-    false (is this you?)
-    none (player card)
-    none
-    Viktor
-    700
-    300
-    big
-    false
-    false
-    true
-    S3
-    S4
-
-    3 (amount of cards)
-    S2 (community card)
-    H4
-    D6
-
-    50 (small blind)
-    100 (minimum bet)
-
-String values:
-    Blind: (none/small/big)
-    Move: (check/raise/fold)

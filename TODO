@@ -1,15 +1,3 @@
-[x] Protocol
-[x] Ta bort pot i förmån till separata bets (det blir smidigt för att splitta potten)
-
-[x] Big blind ska börja
-[x] Det blir fel om första personen höjer, pga betsRemaining
-[x] Om en person inte kan höja, skippa
-[x] Ordningen ska rotera
-
-[x] Hittar tvåpar där det inte finns
-[x] Split pot
-
-[] Jämför samma värde i HandRank
-
+[] Compare same value in HandRank
 [] GUI
 [] Hilarious markers

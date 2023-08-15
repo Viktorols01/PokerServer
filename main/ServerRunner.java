@@ -22,7 +22,7 @@ class ServerRunner {
                     break;
                 case "START":
                     server.closeConnections();
-                    server.start();
+                    server.startGame();
                     break;
                 case "EXIT":
                     break loop;

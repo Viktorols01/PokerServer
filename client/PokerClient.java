@@ -37,7 +37,7 @@ public abstract class PokerClient {
         this.thread = new Thread(() -> {
             while (true) {
                 Protocol.Command command = Protocol.readCommand(connection);
-                printer.print("Received: " + command);
+                printer.print("received: " + command);
                 switch (command) {
                     case REQUEST_NAME: {
                         String[] arguments = getName();
@@ -80,7 +80,7 @@ public abstract class PokerClient {
     }
 
     private void send(Protocol.Command command, String[] arguments) {
-        printer.print("Sent: " + command);
+        printer.print("sent: " + command);
         Protocol.sendPackage(command, arguments, connection);
     }
 
@@ -97,7 +97,7 @@ public abstract class PokerClient {
 
         public void print(String message) {
             if (this.print) {
-                System.out.println(message);
+                System.out.println("Client "+message);
             }
         }
     }

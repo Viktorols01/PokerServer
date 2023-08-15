@@ -13,6 +13,7 @@ import comms.Server;
 
 public class PokerServer extends Server {
     private List<PokerPlayer> players;
+
     private TexasHoldEm game;
     private Thread gameThread;
 
@@ -21,7 +22,7 @@ public class PokerServer extends Server {
         this.players = Collections.synchronizedList(new ArrayList<PokerPlayer>());
     }
 
-    public void start() {
+    public void startGame() {
         this.game = new TexasHoldEm(this);
         this.gameThread = new Thread(() -> {
             while (true) {
