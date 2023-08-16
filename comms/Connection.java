@@ -76,6 +76,10 @@ public class Connection {
         return scanner.nextLine();
     }
 
+    public boolean hasNextLine() {
+        return scanner.hasNextLine();
+    }
+
     public void close() {
         try {
             this.socket.close();

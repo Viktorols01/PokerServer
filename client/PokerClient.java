@@ -36,22 +36,21 @@ public abstract class PokerClient {
     public final void start() {
         this.thread = new Thread(() -> {
             while (true) {
-                Protocol.Command command = Protocol.readCommand(connection);
-                printer.print("received: " + command);
+                Protocol.Command command = readCommand();
                 switch (command) {
                     case REQUEST_NAME: {
                         String[] arguments = getName();
-                        send(Protocol.Command.SEND_NAME, arguments);
+                        sendCommand(Protocol.Command.SEND_NAME, arguments);
                         break;
                     }
                     case REQUEST_TYPE: {
                         String[] arguments = getType();
-                        send(Protocol.Command.SEND_TYPE, arguments);
+                        sendCommand(Protocol.Command.SEND_TYPE, arguments);
                         break;
                     }
                     case REQUEST_MOVE: {
                         String[] arguments = getMove(model);
-                        send(Protocol.Command.SEND_MOVE, arguments);
+                        sendCommand(Protocol.Command.SEND_MOVE, arguments);
                         break;
                     }
                     case ACCEPTED:
@@ -60,13 +59,13 @@ public abstract class PokerClient {
                         break;
                     }
                     case SEND_POKERSTATE: {
-                        String[] arguments = Protocol.readArguments(command, connection);
+                        String[] arguments = readArguments(command);
                         this.model = new PokerModel(arguments);
                         display(model);
                         break;
                     }
                     case SEND_MESSAGE: {
-                        String[] arguments = Protocol.readArguments(command, connection);
+                        String[] arguments = readArguments(command);
                         String message = arguments[0];
                         parseMessage(message);
                         break;
@@ -79,9 +78,27 @@ public abstract class PokerClient {
         this.thread.start();
     }
 
-    private void send(Protocol.Command command, String[] arguments) {
-        printer.print("sent: " + command);
+    private void sendCommand(Protocol.Command command, String[] arguments) {
+        printer.print("sent command: " + command);
         Protocol.sendPackage(command, arguments, connection);
+    }
+
+    private Protocol.Command readCommand() {
+        Protocol.Command command = Protocol.readCommand(connection);
+        printer.print("received command: " + command);
+        return command;
+    }
+
+    private String[] readArguments(Protocol.Command command) {
+        String[] arguments = Protocol.readArguments(command, connection);
+        StringBuilder str = new StringBuilder();
+        str.append("received arguments: ");
+        for (String argument : arguments) {
+            str.append("\n");
+            str.append(argument);
+        }
+        printer.print(str.toString());
+        return arguments;
     }
 
     public PokerModel getModel() {

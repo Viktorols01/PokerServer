@@ -106,20 +106,15 @@ public class TexasHoldEm {
     }
 
     private void getBets() {
-        boolean done = true;
         int choices = 0;
         for (PokerPlayer player : players) {
             if (!player.getPlayerData().hasFolded()) {
-                done = false;
-            }
-            if (player.getPlayerData().getMarkers() > 0) {
-                choices++;
+                if (player.getPlayerData().getMarkers() > 0) {
+                    choices++;
+                }
             }
         }
-        if (choices > 1) {
-            done = false;
-        }
-        if (done) {
+        if (choices < 2) {
             return;
         }
 
@@ -131,7 +126,7 @@ public class TexasHoldEm {
             betsRemaining--;
             i++;
             this.toPlay = player;
-            sendGameInfo(player.getName() + " to play.");
+            sendGameInfo(player.getName() + " to play.", false);
             if (player.getPlayerData().hasFolded() || player.getPlayerData().getMarkers() == 0) {
                 continue;
             }
@@ -228,8 +223,13 @@ public class TexasHoldEm {
             }
         }
 
-        sendGameInfo(winner.getName() + " won with " + maxRank + ".");
+        sendGameInfo(winner.getName() + " won with " + maxRank + ".", true);
         if (done) {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             for (int i = players.size() - 1; i >= 0; i--) {
                 PokerPlayer player = players.get(i);
                 if (player.getPlayerData().getMarkers() == 0) {
@@ -241,7 +241,7 @@ public class TexasHoldEm {
         }
     }
 
-    private String[] toPokerState(Connection connection) {
+    private String[] toPokerState(Connection connection, boolean show) {
         String playercount = String.valueOf(players.size());
         String cardcount = String.valueOf(communityCards.size());
 
@@ -259,7 +259,7 @@ public class TexasHoldEm {
             String you = String.valueOf(isYou);
             String card1;
             String card2;
-            if (isYou || connection.getType() == Connection.Type.SPECTATOR) {
+            if (isYou || (connection.getType() == Connection.Type.SPECTATOR) || show) {
                 card1 = player.getPlayerData().getHand().get(0).toCode();
                 card2 = player.getPlayerData().getHand().get(1).toCode();
             } else {
@@ -289,9 +289,9 @@ public class TexasHoldEm {
         return arguments.toArray(String[]::new);
     }
 
-    private void sendGameInfo(String message) {
+    private void sendGameInfo(String message, boolean show) {
         for (Connection connection : server.getConnections()) {
-            String[] arguments = toPokerState(connection);
+            String[] arguments = toPokerState(connection, show);
             Protocol.sendPackage(Protocol.Command.SEND_POKERSTATE, arguments, connection);
         }
         sendMessage(message);

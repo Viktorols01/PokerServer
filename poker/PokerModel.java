@@ -31,6 +31,9 @@ public class PokerModel {
             if (!card1.equals("none") && !card2.equals("none")) {
                 hand.add(new Card(card1));
                 hand.add(new Card(card2));
+            } else {
+                hand.add(null);
+                hand.add(null);
             }
             PlayerData player = new PlayerData(name, hand, markers, bettedmarkers, folded, blind);
             this.players.add(player);

@@ -30,12 +30,15 @@ public class Protocol {
 
     public static Command readCommand(Connection connection) {
         Command command;
-        try {
-            command = Command.valueOf(connection.nextLine().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            command = Command.UNKNOWN_COMMAND;
+        while (connection.hasNextLine()) {
+            try {
+                command = Command.valueOf(connection.nextLine().toUpperCase());
+                return command;
+            } catch (IllegalArgumentException e) {
+                continue;
+            }
         }
-        return command;
+        return Command.UNKNOWN_COMMAND;
     }
 
     public static String[] readArguments(Command command, Connection connection) {

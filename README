@@ -49,8 +49,11 @@ String values:
     move: (match/check/raise/fold)
 
 Card codes:
+    (color)(value) OR none
+    Colors:
     H - hearts
     D - diamonds
     S - spades
     C - clubs
-    Interval: (1-13)
+    values:
+    (1-13)

@@ -1,7 +1,7 @@
 package main;
 
 import client.PokerClient;
-import client.PokerTerminal;
+import client.PokerFrame;
 import poker.PokerModel;
 
 public class ClientRunner {
@@ -13,8 +13,11 @@ public class ClientRunner {
 
     private static class MyClient extends PokerClient {
 
+        PokerFrame pokerframe;
+
         public MyClient(boolean verbose) {
             super(verbose);
+            this.pokerframe = new PokerFrame();
         }
 
         @Override
@@ -23,7 +26,7 @@ public class ClientRunner {
 
         @Override
         protected String[] getName() {
-            return new String[] { "name" };
+            return new String[] { "Your name" };
         }
 
         @Override
@@ -33,17 +36,17 @@ public class ClientRunner {
 
         @Override
         protected String[] getMove(PokerModel model) {
-            return new String[] { "fold", "0" };
+            return pokerframe.getMove();
         }
 
         @Override
         protected void display(PokerModel model) {
-            PokerTerminal.printModel(model);
+            pokerframe.updateModel(model);
         }
 
         @Override
         protected void parseMessage(String message) {
-            System.out.println(message);
+            pokerframe.updateMessage(message);
         }
 
     }

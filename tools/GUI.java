@@ -1,41 +1,60 @@
 package tools;
 
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Point;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import javax.swing.event.MouseInputListener;
 
-public abstract class GUI {
-    private JFrame jframe;
-    private JPanel panel;
-    private Input input;
+import java.awt.Dimension;
+import java.awt.Point;
+
+public abstract class GUI extends JPanel implements MouseInputListener, KeyListener {
 
     private Thread thread;
+    private Input input;
 
     private int width;
     private int height;
-    private final int fps;
+    private int fps;
     private int frame;
 
-    public GUI() {
-        this.width = 1200;
-        this.height = 800;
-        this.fps = 100;
-        start();
-    }
-
     public GUI(int width, int height, int fps) {
+        super(true);
+        this.input = new Input();
         this.width = width;
         this.height = height;
         this.fps = fps;
-        start();
+        this.frame = 0;
+
+        init();
+    }
+
+    private void init() {
+        this.setup();
+
+        setPreferredSize(new Dimension(width, height));
+        addMouseListener(this);
+        addMouseMotionListener(this);
+        addKeyListener(this);
+
+        this.thread = new Thread(() -> {
+            long nanos = System.nanoTime();
+            long delay = (long) (1e9 / this.fps);
+            while (true) {
+                this.update();
+                this.repaint();
+                while (System.nanoTime() - nanos < delay) {
+                    Thread.yield();
+                }
+                nanos += delay;
+                frame++;
+            }
+        });
+        this.thread.start();
     }
 
     protected abstract void setup();
@@ -44,35 +63,71 @@ public abstract class GUI {
 
     protected abstract void render(Graphics g);
 
-    private void start() {
-        this.jframe = new JFrame();
-        this.panel = new Panel(this.width, this.height);
-        this.input = new Input();
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        render(g);
+    }
 
-        this.jframe.setResizable(false);
-        this.jframe.add(this.panel);
-        this.jframe.pack();
-        this.jframe.setDefaultCloseOperation(3);
-        this.jframe.setVisible(true);
-        this.jframe.setFocusable(true);
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        input.setMouseClicked(true);
+    }
 
-        this.frame = 0;
+    @Override
+    public void mousePressed(MouseEvent e) {
+        if (!input.isMousePressed()) {
+            input.setMouseHeldPosition(getMousePosition());
+        }
+        input.setMousePressed(true);
+        input.setMouseButton(e.getButton());
+    }
 
-        this.setup();
-        this.thread = new Thread(() -> {
-            long nanos = System.nanoTime();
-            long delay = (long) (1e9 / this.fps);
-            while (true) {
-                this.update();
-                this.panel.repaint();
-                while (System.nanoTime() - nanos < delay) {
-                    Thread.yield();
-                }
-                nanos += delay;
-                this.frame++;
-            }
-        });
-        this.thread.start();
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        input.setMousePressed(false);
+        input.setMouseClicked(false);
+        input.setMouseDragged(false);
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+        input.setMousePosition(getMousePosition());
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        input.setMousePosition(getMousePosition());
+        input.setMouseDragged(true);
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        input.setMousePosition(getMousePosition());
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() > 255) {
+            return;
+        }
+        input.setKeyPressed(e.getKeyCode(), true);
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        if (e.getKeyCode() > 255) {
+            return;
+        }
+        input.setKeyPressed(e.getKeyCode(), false);
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
     }
 
     public int getWidth() {
@@ -89,118 +144,6 @@ public abstract class GUI {
 
     public int getFrame() {
         return this.frame;
-    }
-
-    public Point getMousePosition() {
-        return input.getMousePosition();
-    }
-
-    public Point getMouseHeldPosition() {
-        return input.getMouseHeldPosition();
-    }
-
-    public boolean isMousePressed() {
-        return input.isMousePressed();
-    }
-
-    public boolean isMouseClicked() {
-        return input.isMouseClicked();
-    }
-
-    public boolean isMouseDragged() {
-        return input.isMouseDragged();
-    }
-
-    public int getMouseButton() {
-        return input.getMouseButton();
-    }
-
-    public boolean isKeyPressed(int keyCode) {
-        return input.isKeyPressed(keyCode);
-    }
-
-    public boolean isKeyClicked(int keyCode) {
-        return input.isKeyClicked(keyCode);
-    }
-
-    private class Panel extends JPanel implements MouseListener, MouseMotionListener, KeyListener {
-
-        public Panel(int width, int height) {
-            super(true);
-            setPreferredSize(new Dimension(width, height));
-            addMouseListener(this);
-            addMouseMotionListener(this);
-            addKeyListener(this);
-        }
-
-        @Override
-        public void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            render(g);
-            requestFocusInWindow();
-        }
-
-        @Override
-        public void mouseClicked(MouseEvent e) {
-            input.setMouseClicked(true);
-        }
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-            if (!input.isMousePressed()) {
-                input.setMouseHeldPosition(getMousePosition());
-            }
-            input.setMousePressed(true);
-            input.setMouseButton(e.getButton());
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent e) {
-            input.setMousePressed(false);
-            input.setMouseClicked(false);
-            input.setMouseDragged(false);
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            input.setMousePosition(getMousePosition());
-        }
-
-        @Override
-        public void mouseDragged(MouseEvent e) {
-            input.setMousePosition(getMousePosition());
-            input.setMouseDragged(true);
-        }
-
-        @Override
-        public void mouseMoved(MouseEvent e) {
-            input.setMousePosition(getMousePosition());
-        }
-
-        @Override
-        public void keyPressed(KeyEvent e) {
-            if (e.getKeyCode() > 255) {
-                return;
-            }
-            input.setKeyPressed(e.getKeyCode(), true);
-        }
-
-        @Override
-        public void keyReleased(KeyEvent e) {
-            if (e.getKeyCode() > 255) {
-                return;
-            }
-            input.setKeyPressed(e.getKeyCode(), false);
-        }
-
-        @Override
-        public void keyTyped(KeyEvent e) {
-        }
-
-        @Override
-        public void mouseExited(MouseEvent e) {
-        }
-
     }
 
     private class Input {
@@ -304,6 +247,38 @@ public abstract class GUI {
 
         }
 
+    }
+
+    public Point getMousePosition() {
+        return input.getMousePosition();
+    }
+
+    public Point getMouseHeldPosition() {
+        return input.getMouseHeldPosition();
+    }
+
+    public boolean isMousePressed() {
+        return input.isMousePressed();
+    }
+
+    public boolean isMouseClicked() {
+        return input.isMouseClicked();
+    }
+
+    public boolean isMouseDragged() {
+        return input.isMouseDragged();
+    }
+
+    public int getMouseButton() {
+        return input.getMouseButton();
+    }
+
+    public boolean isKeyPressed(int keyCode) {
+        return input.isKeyPressed(keyCode);
+    }
+
+    public boolean isKeyClicked(int keyCode) {
+        return input.isKeyClicked(keyCode);
     }
 
 }
