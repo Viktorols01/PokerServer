@@ -10,7 +10,7 @@ import poker.CardCollection;
 import poker.Deck;
 import poker.HandRank;
 
-public class TexasHoldEm {
+public class HoldEm {
     private PokerServer server;
     private List<PokerPlayer> players;
     private PokerPlayer toPlay;
@@ -24,7 +24,9 @@ public class TexasHoldEm {
 
     private int smallBlindIndex;
 
-    public TexasHoldEm(PokerServer server) {
+    private static final int TIMEFACTOR = 1;
+
+    public HoldEm(PokerServer server) {
         this.server = server;
         this.players = server.getPlayers();
         this.smallBlindIndex = 0;
@@ -126,7 +128,12 @@ public class TexasHoldEm {
             betsRemaining--;
             i++;
             this.toPlay = player;
-            sendGameInfo(player.getName() + " to play.", false);
+
+            if (choices < 2) {
+                return;
+            }
+
+            sendGameInfo(player.getName() + " to play.", false, 1000 * TIMEFACTOR);
             if (player.getPlayerData().hasFolded() || player.getPlayerData().getMarkers() == 0) {
                 continue;
             }
@@ -162,12 +169,14 @@ public class TexasHoldEm {
                     }
                     case "fold": {
                         player.getPlayerData().setFolded(true);
+                        choices--;
                         Protocol.sendPackage(Protocol.Command.ACCEPTED, new String[] {}, player.getConnection());
                         sendMessage(player.getConnection().getName() + " folded.");
                         break;
                     }
                     default:
                         player.getPlayerData().setFolded(true);
+                        choices--;
                         Protocol.sendPackage(Protocol.Command.DENIED, new String[] { "Unknown move" },
                                 player.getConnection());
                         sendMessage(player.getConnection().getName() + " folded.");
@@ -223,13 +232,8 @@ public class TexasHoldEm {
             }
         }
 
-        sendGameInfo(winner.getName() + " won with " + maxRank + ".", true);
+        sendGameInfo(winner.getName() + " won with " + maxRank + ".", true, 3000 * TIMEFACTOR);
         if (done) {
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             for (int i = players.size() - 1; i >= 0; i--) {
                 PokerPlayer player = players.get(i);
                 if (player.getPlayerData().getMarkers() == 0) {
@@ -289,12 +293,17 @@ public class TexasHoldEm {
         return arguments.toArray(String[]::new);
     }
 
-    private void sendGameInfo(String message, boolean show) {
+    private void sendGameInfo(String message, boolean show, int sleep) {
         for (Connection connection : server.getConnections()) {
             String[] arguments = toPokerState(connection, show);
             Protocol.sendPackage(Protocol.Command.SEND_POKERSTATE, arguments, connection);
         }
         sendMessage(message);
+        try {
+            Thread.sleep(sleep);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void sendMessage(String message) {

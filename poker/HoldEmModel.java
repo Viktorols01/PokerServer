@@ -2,7 +2,7 @@ package poker;
 
 import java.util.ArrayList;
 
-public class PokerModel {
+public class HoldEmModel {
     ArrayList<PlayerData> players;
     PlayerData toPlay;
     PlayerData you;
@@ -11,7 +11,7 @@ public class PokerModel {
     int smallBlind;
     int minBet;
 
-    public PokerModel(String[] arguments) {
+    public HoldEmModel(String[] arguments) {
         this.players = new ArrayList<PlayerData>();
         int j = 0;
 

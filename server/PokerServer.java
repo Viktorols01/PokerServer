@@ -14,7 +14,7 @@ import comms.Server;
 public class PokerServer extends Server {
     private List<PokerPlayer> players;
 
-    private TexasHoldEm game;
+    private HoldEm game;
     private Thread gameThread;
 
     public PokerServer(int port) {
@@ -23,7 +23,7 @@ public class PokerServer extends Server {
     }
 
     public void startGame() {
-        this.game = new TexasHoldEm(this);
+        this.game = new HoldEm(this);
         this.gameThread = new Thread(() -> {
             while (true) {
                 game.round();

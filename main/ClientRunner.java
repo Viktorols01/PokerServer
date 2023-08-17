@@ -1,8 +1,8 @@
 package main;
 
 import client.PokerClient;
-import client.PokerFrame;
-import poker.PokerModel;
+import frames.PlayerFrame;
+import poker.HoldEmModel;
 
 public class ClientRunner {
     public static void main(String[] args) {
@@ -13,11 +13,11 @@ public class ClientRunner {
 
     private static class MyClient extends PokerClient {
 
-        PokerFrame pokerframe;
+        PlayerFrame pokerframe;
 
         public MyClient(boolean verbose) {
             super(verbose);
-            this.pokerframe = new PokerFrame();
+            this.pokerframe = new PlayerFrame(1000, 600);
         }
 
         @Override
@@ -35,12 +35,12 @@ public class ClientRunner {
         }
 
         @Override
-        protected String[] getMove(PokerModel model) {
+        protected String[] getMove(HoldEmModel model) {
             return pokerframe.getMove();
         }
 
         @Override
-        protected void display(PokerModel model) {
+        protected void display(HoldEmModel model) {
             pokerframe.updateModel(model);
         }
 

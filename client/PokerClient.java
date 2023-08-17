@@ -2,13 +2,13 @@ package client;
 
 import comms.Connection;
 import comms.Protocol;
-import poker.PokerModel;
+import poker.HoldEmModel;
 
 public abstract class PokerClient {
     private Connection connection;
     private Thread thread;
 
-    private PokerModel model;
+    private HoldEmModel model;
 
     private Printer printer;
 
@@ -27,9 +27,9 @@ public abstract class PokerClient {
 
     protected abstract String[] getType();
 
-    protected abstract String[] getMove(PokerModel model);
+    protected abstract String[] getMove(HoldEmModel model);
 
-    protected abstract void display(PokerModel model);
+    protected abstract void display(HoldEmModel model);
 
     protected abstract void parseMessage(String message);
 
@@ -60,7 +60,7 @@ public abstract class PokerClient {
                     }
                     case SEND_POKERSTATE: {
                         String[] arguments = readArguments(command);
-                        this.model = new PokerModel(arguments);
+                        this.model = new HoldEmModel(arguments);
                         display(model);
                         break;
                     }
@@ -101,7 +101,7 @@ public abstract class PokerClient {
         return arguments;
     }
 
-    public PokerModel getModel() {
+    public HoldEmModel getModel() {
         return this.model;
     }
 

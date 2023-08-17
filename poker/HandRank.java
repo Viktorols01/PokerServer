@@ -2,16 +2,16 @@ package poker;
 
 public class HandRank {
     private int value;
-    private int kickerValue;
-
-    public HandRank(int value, int kickerValue) {
-        this.value = value;
-        this.kickerValue = kickerValue;
-    }
+    private CardCollection cards;
 
     public HandRank() {
         this.value = 0;
-        this.kickerValue = 0;
+        this.cards = new CardCollection();
+    }
+
+    public HandRank(int value, CardCollection cards) {
+        this.value = value;
+        this.cards = cards;
     }
 
     public int getValue() {
@@ -22,19 +22,23 @@ public class HandRank {
         this.value = value;
     }
 
-    public int getKickerValue() {
-        return kickerValue;
+    public CardCollection getCards() {
+        return cards;
     }
 
-    public void setKickerValue(int kickerValue) {
-        this.kickerValue = kickerValue;
+    public boolean equal(HandRank rank) {
+        if (this.getValue() == rank.getValue()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public boolean greaterThan(HandRank rank) {
-        if (this.value == rank.getValue()) {
-            return this.kickerValue > rank.getKickerValue();
+        if (this.getValue() > rank.getValue()) {
+            return true;
         } else {
-            return this.value > rank.getValue();
+            return false;
         }
     }
 
@@ -88,13 +92,13 @@ public class HandRank {
                 }
             }
         }
-        return new HandRank(1, maxValue);
+        return new HandRank(1, null);
     }
 
     private static HandRank getPair(CardGrid grid) {
         for (int value = 14; value > 1; value--) {
             if (grid.valueCount(value) == 2) {
-                return new HandRank(2, value);
+                return new HandRank(2, null);
             }
         }
         return null;
@@ -111,7 +115,7 @@ public class HandRank {
                 pairCounter++;
             }
             if (pairCounter == 2) {
-                return new HandRank(3, maxValue);
+                return new HandRank(3, null);
             }
         }
         return null;
@@ -120,7 +124,7 @@ public class HandRank {
     private static HandRank getThreeOfAKind(CardGrid grid) {
         for (int value = 14; value > 1; value--) {
             if (grid.valueCount(value) == 3) {
-                return new HandRank(4, value);
+                return new HandRank(4, null);
             }
         }
         return null;
@@ -138,7 +142,7 @@ public class HandRank {
             }
 
             if (counter == 5) {
-                return new HandRank(5, startValue);
+                return new HandRank(5, null);
             }
         }
         return null;
@@ -156,7 +160,7 @@ public class HandRank {
                     counter++;
                 }
                 if (counter == 5) {
-                    return new HandRank(6, maxValue);
+                    return new HandRank(6, null);
                 }
             }
         }
@@ -177,7 +181,7 @@ public class HandRank {
                 }
             }
             if (tripleValue > 0 && doubleValue > 0) {
-                return new HandRank(7, tripleValue);
+                return new HandRank(7, null);
             }
         }
         return null;
@@ -186,7 +190,7 @@ public class HandRank {
     private static HandRank getFourOfAKind(CardGrid grid) {
         for (int value = 14; value > 1; value--) {
             if (grid.valueCount(value) == 4) {
-                return new HandRank(8, value);
+                return new HandRank(8, null);
             }
         }
         return null;
@@ -206,7 +210,7 @@ public class HandRank {
                 }
 
                 if (counter == 5) {
-                    return new HandRank(9, startValue);
+                    return new HandRank(9, null);
                 }
             }
         }
@@ -216,7 +220,7 @@ public class HandRank {
     private static CardGrid getGrid(CardCollection cardCollection) {
         CardGrid grid = new CardGrid();
         for (Card card : cardCollection) {
-            grid.setCard(card);
+            grid.addCard(card);
         }
         return grid;
     }
@@ -228,13 +232,17 @@ public class HandRank {
             this.grid = new boolean[4][14];
         }
 
-        private void setCard(Card card) {
+        private void addCard(Card card) {
             int value = card.getValue();
             int colorIndex = card.getColor().ordinal();
             if (value == 1) {
                 this.grid[colorIndex][13] = true;
             }
             this.grid[colorIndex][value - 1] = true;
+        }
+
+        private Card getCard(int colorIndex, int value) {
+            return new Card(Card.Color.values()[colorIndex], value);
         }
 
         private boolean hasCard(int colorIndex, int value) {
@@ -287,7 +295,6 @@ public class HandRank {
                 str.append("Royal flush ");
                 break;
         }
-        str.append("(" + this.kickerValue + ")");
         return str.toString();
     }
 }
