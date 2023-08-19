@@ -56,4 +56,16 @@ public class Card {
             };
         }
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if ((other == null) || (getClass() != other.getClass())) {
+            return false;
+        } else {
+            if (this.getValue() == ((Card) other).getValue() && this.getColor() == ((Card) other).getColor()) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

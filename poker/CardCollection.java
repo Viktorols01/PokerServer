@@ -30,6 +30,16 @@ public class CardCollection implements Iterable<Card>, Cloneable {
         return cards.get(i);
     }
 
+    public boolean hasIndex(int i) {
+        if (i < 0) {
+            return false;
+        } else if (i >= cards.size()) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     public int size() {
         return cards.size();
     }

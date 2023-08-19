@@ -9,9 +9,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
 
-import poker.Card;
-import poker.CardCollection;
-import poker.HandRank;
 import poker.PlayerData;
 
 public class PlayerFrame extends PokerFrame {
@@ -67,7 +64,8 @@ public class PlayerFrame extends PokerFrame {
 
     @Override
     protected void onUpdateMessage() {
-        getJFrame().setTitle("PlayerFrame | " + getMessage());
+        getJFrame().setTitle("PlayerFrame");
+        this.updateRenderables(getGUI());
     }
 
     @Override
@@ -89,14 +87,9 @@ public class PlayerFrame extends PokerFrame {
                 final int cardwidth = 80;
                 final int cardheight = 130;
                 final int cardmargin = 10;
-                for (int i = 0; i < getModel().getCommunityCards().size(); i++) {
-                    final int fi = i;
-                    Card card = getModel().getCommunityCards().get(i);
-                    addRenderable(0, (g, q) -> {
-                        renderCard(g, card, getGUI().getWidth() / 2 + (fi - 2) * (cardwidth + cardmargin),
-                                getGUI().getHeight() / 2, cardwidth, cardheight, cardmargin);
-                    });
-                }
+                final int x = getGUI().getWidth() / 2 - 2 * cardwidth;
+                final int y = getGUI().getHeight() / 2;
+                addCommunityCards(x, y, cardwidth, cardheight, cardmargin);
             }
 
             {
@@ -105,42 +98,21 @@ public class PlayerFrame extends PokerFrame {
                 final int cardmargin = 7;
                 for (int j = 0; j < getModel().getPlayers().size(); j++) {
                     PlayerData player = getModel().getPlayers().get(j);
-                    addPlayerFrame(player, cardmargin, cardmargin + j * (cardheight + cardmargin), cardwidth,
-                            cardheight,
-                            cardmargin);
+                    final int x = cardmargin;
+                    final int y = cardmargin + j * (cardheight + cardmargin);
+                    addPlayerFrame(player, x, y, cardwidth, cardheight, cardmargin);
                 }
             }
 
             {
-                final int cardwidth = 50;
-                final int cardheight = 80;
-                final int cardmargin = 7;
-                for (int i = 0; i < getModel().getYou().getHand().size(); i++) {
-                    final int fi = i;
-                    Card card = getModel().getYou().getHand().get(i);
-                    addRenderable(0, (g, q) -> {
-                        renderCard(g, card, fi * (cardwidth + cardmargin), getGUI().getHeight() - cardheight,
-                                cardwidth,
-                                cardheight,
-                                cardmargin);
-                    });
-                }
-
-                addRenderable(0, (g, q) -> {
-                    renderString(g, "Pot: " + getModel().getPot(), cardmargin,
-                            getGUI().getHeight() - cardwidth - cardmargin - 90 - 20,
-                            20, new Color(0, 0, 0));
-                    renderString(g,
-                            "Must bet: " + (getModel().getMinBet() - getModel().getYou().getBettedMarkers()),
-                            cardmargin,
-                            getGUI().getHeight() - cardwidth - cardmargin - 60 - 20, 20, new Color(0, 0, 0));
-                    HandRank rank = HandRank
-                            .rank(CardCollection.join(getModel().getYou().getHand(),
-                                    getModel().getCommunityCards()));
-                    renderString(g, "You have: " + rank,
-                            cardmargin,
-                            getGUI().getHeight() - cardwidth - cardmargin - 30 - 20, 20, new Color(0, 0, 0));
-                });
+                final int height = 100;
+                final int width = 200;
+                final int margin = 20;
+                addYouFrame(0, getGUI().getHeight() - height, width * 2, height, margin);
+                addPot(getGUI().getWidth() / 2, margin, width, height, margin);
+                addMessage(width * 2 + margin, getGUI().getHeight() - height, width * 2, height / 2, margin / 2);
+                addRemainingBets(width * 2 + margin, getGUI().getHeight() - height / 2, width * 2, height / 2,
+                        margin / 2);
             }
         }
 
@@ -156,77 +128,5 @@ public class PlayerFrame extends PokerFrame {
         }
         this.hasMove = false;
         return this.move;
-    }
-
-    private interface Function {
-        public abstract int f(float q);
-    }
-
-    protected void addCard(Card card, int x, int y, int cardwidth, int cardheight, int cardmargin) {
-        final Function offset;
-        offset = (q) -> {
-            return 0;
-        };
-        this.addRenderable(0.1, (g, q) -> {
-            renderCard(g, card, x, y + offset.f(q),
-                    cardwidth,
-                    cardheight,
-                    cardmargin);
-        });
-    }
-
-    protected void addPlayerFrame(PlayerData player, int x, int y, int cardwidth, int cardheight, int cardmargin) {
-        final Function offset;
-        if (player.getName().equals(getModel().getToPlay().getName())) {
-            offset = (q) -> {
-                return (int) (20 * q);
-            };
-        } else if (player.getName().equals(getPrevModel().getToPlay().getName())) {
-            offset = (q) -> {
-                return 20 - (int) (20 * q);
-            };
-        } else {
-            offset = (q) -> {
-                return 0;
-            };
-        }
-
-        this.addRenderable(0.1, (g, q) -> {
-            g.setColor(new Color(0, 0, 0, 100));
-            g.fillRoundRect(x + offset.f(q), y, cardwidth * 7,
-                    cardheight, cardmargin, cardmargin);
-        });
-
-        for (int i = 0; i < player.getHand().size(); i++) {
-            final int fi = i;
-            Card card = player.getHand().get(i);
-            addRenderable(0.1, (g, q) -> {
-                renderCard(g, card, x + offset.f(q) + fi * (cardwidth + cardmargin),
-                        y,
-                        cardwidth,
-                        cardheight,
-                        cardmargin);
-            });
-        }
-        final Color color;
-        if (player.hasFolded()) {
-            color = new Color(100, 100, 100);
-        } else {
-            color = new Color(255, 255, 255);
-        }
-        addRenderable(0.1, (g, q) -> {
-            renderString(g, player.getName(),
-                    x + offset.f(q) + player.getHand().size() * (cardwidth + cardmargin),
-                    y,
-                    cardheight / 3, color);
-            renderString(g, "Markers: " + player.getMarkers(),
-                    x + offset.f(q) + player.getHand().size() * (cardwidth + cardmargin),
-                    y + cardheight * 1 / 3,
-                    cardheight / 3, color);
-            renderString(g, "Bets: " + player.getBettedMarkers(),
-                    x + offset.f(q) + player.getHand().size() * (cardwidth + cardmargin),
-                    y + cardheight * 2 / 3,
-                    cardheight / 3, color);
-        });
     }
 }

@@ -92,4 +92,16 @@ public class PlayerData {
     public void setFolded(boolean folded) {
         this.folded = folded;
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if ((other == null) || (getClass() != other.getClass())) {
+            return false;
+        } else {
+            if (this.getName().equals(((PlayerData) other).getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
