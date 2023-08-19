@@ -3,13 +3,13 @@ package poker;
 import java.util.ArrayList;
 
 public class HoldEmModel {
-    ArrayList<PlayerData> players;
-    PlayerData toPlay;
-    PlayerData you;
-    CardCollection communityCards;
+    private ArrayList<PlayerData> players;
+    private PlayerData toPlay;
+    private PlayerData you;
+    private CardCollection communityCards;
 
-    int smallBlind;
-    int minBet;
+    private int smallBlind;
+    private int minBet;
 
     public HoldEmModel(String[] arguments) {
         this.players = new ArrayList<PlayerData>();

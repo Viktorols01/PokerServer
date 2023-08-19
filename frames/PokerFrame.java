@@ -1,6 +1,5 @@
 package frames;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -9,18 +8,14 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
-import javax.swing.JFrame;
 
 import poker.Card;
 import poker.HoldEmModel;
-import tools.GUI;
+import tools.RenderableFrame;
 
-public abstract class PokerFrame {
+public abstract class PokerFrame extends RenderableFrame {
 
-    private JFrame jframe;
-
-    private PokerGUI gui;
-
+    private HoldEmModel prevModel;
     private HoldEmModel model;
     private String message;
 
@@ -31,8 +26,7 @@ public abstract class PokerFrame {
     private static BufferedImage unknown;
 
     public PokerFrame(int width, int height) {
-        this.jframe = new JFrame();
-        this.gui = new PokerGUI(width, height);
+        super(width, height);
         try {
             hearts = ImageIO.read(new File("images/hearts.png"));
             diamonds = ImageIO.read(new File("images/diamonds.png"));
@@ -42,28 +36,19 @@ public abstract class PokerFrame {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        initJFrame();
     }
-
-    protected abstract void addComponents(JFrame jframe);
-
-    protected abstract void renderGUI(Graphics g);
 
     protected abstract void onUpdateModel();
 
     protected abstract void onUpdateMessage();
 
-    private void initJFrame() {
-        jframe.setDefaultCloseOperation(3);
-        jframe.setLayout(new BorderLayout());
-        addComponents(jframe);
-        jframe.pack();
-        jframe.setResizable(false);
-        jframe.setVisible(true);
-    }
-
-    public void updateModel(HoldEmModel model) {
-        this.model = model;
+    public void updateModel(HoldEmModel newModel) {
+        if (this.model == null) {
+            this.prevModel = newModel;
+        } else {
+            this.prevModel = this.model;
+        }
+        this.model = newModel;
         onUpdateModel();
     }
 
@@ -72,39 +57,15 @@ public abstract class PokerFrame {
         onUpdateMessage();
     }
 
-    protected class PokerGUI extends GUI {
-
-        public PokerGUI(int width, int height) {
-            super(width, height, 60);
-        }
-
-        @Override
-        protected void setup() {
-        }
-
-        @Override
-        protected void update() {
-        }
-
-        @Override
-        protected void render(Graphics g) {
-            renderGUI(g);
-        }
-    }
-
-    public JFrame getJFrame() {
-        return jframe;
-    }
-
-    public PokerGUI getGUI() {
-        return gui;
-    }
-
-    public HoldEmModel getModel() {
+    protected HoldEmModel getModel() {
         return model;
     }
 
-    public String getMessage() {
+    protected HoldEmModel getPrevModel() {
+        return prevModel;
+    }
+
+    protected String getMessage() {
         return message;
     }
 

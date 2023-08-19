@@ -133,10 +133,12 @@ public class HoldEm {
                 return;
             }
 
-            sendGameInfo(player.getName() + " to play.", false, 1000 * TIMEFACTOR);
             if (player.getPlayerData().hasFolded() || player.getPlayerData().getMarkers() == 0) {
                 continue;
             }
+
+            sendGameInfo(player.getName() + " to play.", false, 1000 * TIMEFACTOR);
+
             System.out.println("REQUEST_MOVE to " + player.getConnection().getName());
             Protocol.sendPackage(Protocol.Command.REQUEST_MOVE, new String[] {}, player.getConnection());
             Protocol.Command command = Protocol.readCommand(player.getConnection());
@@ -232,7 +234,8 @@ public class HoldEm {
             }
         }
 
-        sendGameInfo(winner.getName() + " won with " + maxRank + ".", true, 3000 * TIMEFACTOR);
+        this.toPlay = winner;
+        sendGameInfo(winner.getName() + " won!", true, 3000 * TIMEFACTOR);
         if (done) {
             for (int i = players.size() - 1; i >= 0; i--) {
                 PokerPlayer player = players.get(i);
