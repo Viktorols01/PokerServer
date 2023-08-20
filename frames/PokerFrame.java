@@ -152,6 +152,13 @@ public abstract class PokerFrame extends RenderableFrame {
         });
     }
 
+    protected final void addPlayerFrames(int x, int y, int cardwidth, int cardheight, int cardmargin) {
+        for (int j = 0; j < getModel().getPlayers().size(); j++) {
+            PlayerData player = getModel().getPlayers().get(j);
+            addPlayerFrame(player, x, y + j * (cardheight + cardmargin), cardwidth, cardheight, cardmargin);
+        }
+    }
+
     protected final void addPlayerFrame(PlayerData player, int x, int y, int cardwidth, int cardheight,
             int cardmargin) {
         final Function offset;

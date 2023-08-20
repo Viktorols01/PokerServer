@@ -9,8 +9,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
 
-import poker.PlayerData;
-
 public class PlayerFrame extends PokerFrame {
 
     private JButton checkButton;
@@ -23,6 +21,7 @@ public class PlayerFrame extends PokerFrame {
 
     public PlayerFrame(int width, int height) {
         super(width, height);
+        getJFrame().setTitle("PlayerFrame");
     }
 
     @Override
@@ -59,17 +58,16 @@ public class PlayerFrame extends PokerFrame {
     @Override
     protected void onUpdateModel() {
         this.checkButton.setText("check (" + (getModel().getMinBet() - getModel().getYou().getBettedMarkers()) + ")");
-        this.updateRenderables(getGUI());
+        this.updateRenderables();
     }
 
     @Override
     protected void onUpdateMessage() {
-        getJFrame().setTitle("PlayerFrame");
-        this.updateRenderables(getGUI());
+        this.updateRenderables();
     }
 
     @Override
-    protected void updateRenderables(RenderableGUI gui) {
+    public void updateRenderables() {
         clearRenderables();
         if (getModel() == null) {
             addRenderable(0, (g, q) -> {
@@ -96,12 +94,7 @@ public class PlayerFrame extends PokerFrame {
                 final int cardwidth = 50;
                 final int cardheight = 80;
                 final int cardmargin = 7;
-                for (int j = 0; j < getModel().getPlayers().size(); j++) {
-                    PlayerData player = getModel().getPlayers().get(j);
-                    final int x = cardmargin;
-                    final int y = cardmargin + j * (cardheight + cardmargin);
-                    addPlayerFrame(player, x, y, cardwidth, cardheight, cardmargin);
-                }
+                addPlayerFrames(cardmargin, cardmargin, cardwidth, cardheight, cardmargin);
             }
 
             {

@@ -1,10 +1,12 @@
-[] I GUI kan du inte jämföra spelare, du får referensen men vill jämföra värdena
+[] Simplify use of getModel()
 
 [] Compare same value in HandRank
 [] Split pot
 [] Handle people leaving
 
 [] Player statistics
+
+[] Server is to decide how fast game proceeds
 
 [] Hilarious markers
 [] Perfect GUI

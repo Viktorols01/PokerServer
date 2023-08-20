@@ -19,6 +19,7 @@ public abstract class PokerClient {
 
     public void connect(String ip, int port) {
         this.connection = new Connection(ip, port);
+        this.start();
     }
 
     protected abstract void setup();
@@ -33,7 +34,7 @@ public abstract class PokerClient {
 
     protected abstract void parseMessage(String message);
 
-    public final void start() {
+    private final void start() {
         this.thread = new Thread(() -> {
             while (true) {
                 Protocol.Command command = readCommand();

@@ -2,9 +2,6 @@ package server;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import comms.Connection;
 import comms.Protocol;
@@ -12,22 +9,24 @@ import comms.Protocol.Command;
 import comms.Server;
 
 public class PokerServer extends Server {
-    private List<PokerPlayer> players;
 
     private HoldEm game;
     private Thread gameThread;
 
+    private Broadcaster broadcaster;
+
     public PokerServer(int port) {
         super(port);
-        this.players = Collections.synchronizedList(new ArrayList<PokerPlayer>());
+        this.game = new HoldEm(this);
+        this.broadcaster = new Broadcaster();
     }
 
     public void startGame() {
-        this.game = new HoldEm(this);
+        this.game.setup();
         this.gameThread = new Thread(() -> {
             while (true) {
-                game.round();
-                if (players.size() == 1) {
+                game.playRound();
+                if (game.getPlayerCount() == 1) {
                     break;
                 }
             }
@@ -66,6 +65,7 @@ public class PokerServer extends Server {
                                 + " tried to connect but " + name + " was taken.");
                     } else {
                         addConnection(connection, name);
+                        broadcaster.broadcast("player joined");
                     }
                 } else {
                     rejectConnection(connection, socket.getInetAddress().getHostAddress()
@@ -83,19 +83,19 @@ public class PokerServer extends Server {
                         Connection.Type type = Connection.Type.valueOf(arguments[0].toUpperCase());
                         switch (type) {
                             case PLAYER:
-                                PokerPlayer player = new PokerPlayer(connection, 1000);
-                                players.add(player);
+                                game.addPlayer(connection);
                                 setType(connection, type);
                                 break;
                             case SPECTATOR:
                                 setType(connection, type);
                                 break;
                             default:
-                                Protocol.sendPackage(Protocol.Command.DENIED, new String[] { "Invalid type" }, connection);
+                                Protocol.sendPackage(Protocol.Command.DENIED, new String[] { "Invalid type" },
+                                        connection);
                                 break;
                         }
                     }
-                } 
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -104,17 +104,11 @@ public class PokerServer extends Server {
         }
     }
 
-    public List<PokerPlayer> getPlayers() {
-        return this.players;
+    public HoldEm getGame() {
+        return this.game;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder str = new StringBuilder(super.toString());
-        str.append("Players:" + "\n");
-        for (PokerPlayer player : players) {
-            str.append(player.getName() + ": " + player.getPlayerData().getMarkers() + " markers \n");
-        }
-        return str.toString();
+    public Broadcaster getBroadcaster() {
+        return this.broadcaster;
     }
 }

@@ -4,22 +4,22 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import comms.Connection.Type;
 
 public abstract class Server {
+
     protected ServerSocket serversocket;
     protected List<Connection> connections;
-    protected boolean open;
 
     protected Thread joinListener;
+    protected boolean open;
 
     public Server(int port) {
         try {
             this.serversocket = new ServerSocket(port);
-            this.connections = Collections.synchronizedList(new ArrayList<Connection>());
+            this.connections = new ArrayList<Connection>();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -81,17 +81,5 @@ public abstract class Server {
 
     public List<Connection> getConnections() {
         return this.connections;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder str = new StringBuilder();
-        str.append("IP: " + getIP() + "\n");
-        str.append("Port: " + getPort() + "\n");
-        str.append("Connected clients:" + "\n");
-        for (Connection connection : connections) {
-            str.append(connection.getIP() + ": " + connection.getName() + "\n");
-        }
-        return str.toString();
     }
 }

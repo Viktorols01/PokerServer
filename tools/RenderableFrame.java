@@ -27,7 +27,7 @@ public abstract class RenderableFrame {
 
     protected abstract void addComponents(JFrame jframe);
 
-    protected abstract void updateRenderables(RenderableGUI gui);
+    public abstract void updateRenderables();
 
     protected final void clearRenderables() {
         this.gui.clearRenderables();
@@ -59,22 +59,19 @@ public abstract class RenderableFrame {
         protected void update() {
         }
 
-        public void addRenderable(Renderable r) {
+        public synchronized void addRenderable(Renderable r) {
             this.renderables.add(r);
         }
 
-        public void clearRenderables() {
-            this.renderables = new ArrayList<Renderable>();
+        public synchronized void clearRenderables() {
+            this.renderables.clear();
         }
 
         @Override
-        protected void render(Graphics g) {
-            synchronized (renderables) {
-                for (Renderable r : renderables) {
-                    r.render(g);
-                }
+        protected synchronized void render(Graphics g) {
+            for (Renderable r : renderables) {
+                r.render(g);
             }
-            ;
         }
     }
 

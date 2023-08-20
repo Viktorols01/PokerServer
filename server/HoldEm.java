@@ -1,5 +1,7 @@
 package server;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
@@ -9,9 +11,12 @@ import poker.Card;
 import poker.CardCollection;
 import poker.Deck;
 import poker.HandRank;
+import poker.HoldEmModel;
 
 public class HoldEm {
     private PokerServer server;
+    private Broadcaster broadcaster;
+
     private List<PokerPlayer> players;
     private PokerPlayer toPlay;
 
@@ -28,13 +33,17 @@ public class HoldEm {
 
     public HoldEm(PokerServer server) {
         this.server = server;
-        this.players = server.getPlayers();
+        this.broadcaster = new Broadcaster();
+        this.players = Collections.synchronizedList(new ArrayList<PokerPlayer>());
         this.smallBlindIndex = 0;
+    }
+
+    public void setup() {
         this.setupBlinds();
         sendMessage("Welcome!");
     }
 
-    public void round() {
+    public void playRound() {
         start();
         betBlinds();
         getBets();
@@ -137,7 +146,7 @@ public class HoldEm {
                 continue;
             }
 
-            sendGameInfo(player.getName() + " to play.", false, 1000 * TIMEFACTOR);
+            sendGameInfo(player.getName() + " to play.", false, 1000);
 
             System.out.println("REQUEST_MOVE to " + player.getConnection().getName());
             Protocol.sendPackage(Protocol.Command.REQUEST_MOVE, new String[] {}, player.getConnection());
@@ -147,7 +156,12 @@ public class HoldEm {
             if (command == Protocol.Command.SEND_MOVE) {
                 String[] arguments = Protocol.readArguments(command, player.getConnection());
                 String move = arguments[0];
-                int value = Integer.parseInt(arguments[1]);
+                int value;
+                try {
+                    value = Integer.parseInt(arguments[1]);
+                } catch (NumberFormatException e) {
+                    value = 0;
+                }
                 value = Math.max(0, value);
 
                 switch (move) {
@@ -235,7 +249,7 @@ public class HoldEm {
         }
 
         this.toPlay = winner;
-        sendGameInfo(winner.getName() + " won!", true, 3000 * TIMEFACTOR);
+        sendGameInfo(winner.getName() + " won!", true, 3000);
         if (done) {
             for (int i = players.size() - 1; i >= 0; i--) {
                 PokerPlayer player = players.get(i);
@@ -248,7 +262,24 @@ public class HoldEm {
         }
     }
 
+    public HoldEmModel getHoldEmModel() {
+        return new HoldEmModel(toPokerState(null, true));
+    }
+
     private String[] toPokerState(Connection connection, boolean show) {
+        boolean showAll;
+        if (show) {
+            showAll = true;
+        } else if (connection != null) {
+            if (connection.getType() == Connection.Type.SPECTATOR) {
+                showAll = true;
+            } else {
+                showAll = false;
+            }
+        } else {
+            showAll = false;
+        }
+
         String playercount = String.valueOf(players.size());
         String cardcount = String.valueOf(communityCards.size());
 
@@ -266,7 +297,7 @@ public class HoldEm {
             String you = String.valueOf(isYou);
             String card1;
             String card2;
-            if (isYou || (connection.getType() == Connection.Type.SPECTATOR) || show) {
+            if (isYou || showAll) {
                 card1 = player.getPlayerData().getHand().get(0).toCode();
                 card2 = player.getPlayerData().getHand().get(1).toCode();
             } else {
@@ -302,8 +333,9 @@ public class HoldEm {
             Protocol.sendPackage(Protocol.Command.SEND_POKERSTATE, arguments, connection);
         }
         sendMessage(message);
+        broadcaster.broadcast(message);
         try {
-            Thread.sleep(sleep);
+            Thread.sleep(sleep * TIMEFACTOR);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -314,5 +346,17 @@ public class HoldEm {
             String[] arguments = new String[] { message };
             Protocol.sendPackage(Protocol.Command.SEND_MESSAGE, arguments, connection);
         }
+    }
+
+    public void addPlayer(Connection connection) {
+        this.players.add(new PokerPlayer(connection, 1000));
+    }
+
+    public int getPlayerCount() {
+        return this.players.size();
+    }
+
+    public Broadcaster getBroadcaster() {
+        return this.broadcaster;
     }
 }

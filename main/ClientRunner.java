@@ -8,7 +8,6 @@ public class ClientRunner {
     public static void main(String[] args) {
         PokerClient client = new MyClient(false);
         client.connect("localhost", 50160);
-        client.start();
     }
 
     private static class MyClient extends PokerClient {
@@ -17,7 +16,7 @@ public class ClientRunner {
 
         public MyClient(boolean verbose) {
             super(verbose);
-            this.pokerframe = new PlayerFrame(1000, 600);
+            this.pokerframe = new PlayerFrame(1200, 800);
         }
 
         @Override
