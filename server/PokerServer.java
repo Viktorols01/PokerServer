@@ -24,12 +24,7 @@ public class PokerServer extends Server {
     public void startGame() {
         this.game.setup();
         this.gameThread = new Thread(() -> {
-            while (true) {
-                game.playRound();
-                if (game.getPlayerCount() == 1) {
-                    break;
-                }
-            }
+            game.play();
         }, "gameThread");
         this.gameThread.start();
     }

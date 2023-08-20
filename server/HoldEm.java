@@ -29,7 +29,7 @@ public class HoldEm {
 
     private int smallBlindIndex;
 
-    private static final int TIMEFACTOR = 1;
+    private static final int TIMEFACTOR = 0;
 
     public HoldEm(PokerServer server) {
         this.server = server;
@@ -43,7 +43,16 @@ public class HoldEm {
         sendMessage("Welcome!");
     }
 
-    public void playRound() {
+    public void play() {
+        while (true) {
+            playRound();
+            if (getPlayerCount() <= 1) {
+                break;
+            }
+        }
+    }
+
+    private void playRound() {
         start();
         betBlinds();
         getBets();
@@ -96,7 +105,7 @@ public class HoldEm {
 
     private void resetPlayers() {
         for (PokerPlayer player : players) {
-            player.getPlayerData().getHand().empty();
+            player.getPlayerData().getHand().clear();
             player.getPlayerData().setFolded(false);
         }
     }
@@ -223,7 +232,7 @@ public class HoldEm {
     }
 
     private void determineWinner() {
-        PokerPlayer winner = null;
+        ArrayList<PokerPlayer> winners = new ArrayList<PokerPlayer>();
         HandRank maxRank = new HandRank();
         for (PokerPlayer player : players) {
             if (player.getPlayerData().hasFolded() || player.getPlayerData().getBettedMarkers() == 0) {
@@ -231,14 +240,29 @@ public class HoldEm {
             }
             CardCollection hand = CardCollection.join(communityCards, player.getPlayerData().getHand());
             HandRank rank = HandRank.rank(hand);
-            if (rank.greaterThan(maxRank)) {
-                winner = player;
+            int comparison = rank.compare(maxRank);
+            if (comparison == 1) {
+                winners.clear();
+                winners.add(player);
                 maxRank = rank;
+            } else if (comparison == 0) {
+                winners.add(player);
             }
         }
-        int win = winner.getPlayerData().getBettedMarkers();
+        int min = Integer.MAX_VALUE;
+        for (PokerPlayer winner : winners) {
+            if (winner.getPlayerData().getBettedMarkers() < min) {
+                min = winner.getPlayerData().getBettedMarkers();
+            }
+        }
+
+        int pot = 0;
         for (PokerPlayer player : players) {
-            winner.getPlayerData().giveMarkers(player.getPlayerData().takeBettedMarkers(win));
+            pot += player.getPlayerData().takeBettedMarkers(min);
+        }
+
+        for (PokerPlayer winner : winners) {
+            winner.getPlayerData().giveMarkers(pot / winners.size());
         }
 
         boolean done = true;
@@ -248,8 +272,13 @@ public class HoldEm {
             }
         }
 
-        this.toPlay = winner;
-        sendGameInfo(winner.getName() + " won!", true, 3000);
+        this.toPlay = winners.get(0);
+        StringBuilder winnerNames = new StringBuilder();
+        for (PokerPlayer winner : winners) {
+            winnerNames.append(winner.getName());
+            winnerNames.append(" ");
+        }
+        sendGameInfo(winnerNames + "won!", true, 3000);
         if (done) {
             for (int i = players.size() - 1; i >= 0; i--) {
                 PokerPlayer player = players.get(i);

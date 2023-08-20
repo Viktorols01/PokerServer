@@ -8,6 +8,7 @@ import java.awt.FlowLayout;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JToggleButton;
 
 import comms.Connection;
 import server.PokerServer;
@@ -19,6 +20,8 @@ public class ServerFrame extends PokerFrame {
     private JButton openButton;
     private JButton closeButton;
     private JButton startButton;
+    private JToggleButton continueGameButton;
+    private boolean continueGame;
 
     private Thread gameListener;
     private Thread joinListener;
@@ -79,6 +82,17 @@ public class ServerFrame extends PokerFrame {
             server.startGame();
         });
         container.add(startButton);
+        continueGameButton = new JToggleButton("pause");
+        continueGameButton.addActionListener((e) -> {
+            if (continueGame) {
+                continueGame = false;
+                continueGameButton.setText("resume");
+            } else {
+                continueGame = true;
+                continueGameButton.setText("pause");
+            }
+        });
+        container.add(continueGameButton);
         jframe.add(getGUI(), BorderLayout.CENTER);
         jframe.add(container, BorderLayout.SOUTH);
     }

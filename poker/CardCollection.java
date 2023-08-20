@@ -26,6 +26,19 @@ public class CardCollection implements Iterable<Card>, Cloneable {
         cards.add(card);
     }
 
+    public void pushFirstWithMaxSize(Card card, int maxSize) {
+        cards.add(0, card);
+        if (size() > maxSize) {
+            cards.remove(size() - 1);
+        }
+    }
+
+    public void addWithMaxSize(Card card, int maxSize) {
+        if (size() < maxSize) {
+            add(card);
+        }
+    }
+
     public Card get(int i) {
         return cards.get(i);
     }
@@ -71,7 +84,7 @@ public class CardCollection implements Iterable<Card>, Cloneable {
         return cards.iterator();
     }
 
-    @Override 
+    @Override
     public CardCollection clone() {
         CardCollection clone = new CardCollection();
         for (Card c : this.cards) {
@@ -80,7 +93,7 @@ public class CardCollection implements Iterable<Card>, Cloneable {
         return clone;
     }
 
-    public void empty() {
-        this.cards = new ArrayList<Card>();
+    public void clear() {
+        this.cards.clear();
     }
 }

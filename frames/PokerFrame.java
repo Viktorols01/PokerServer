@@ -204,15 +204,21 @@ public abstract class PokerFrame extends RenderableFrame {
             renderString(g, player.getName(),
                     x + (int) (offset.f(q)) + player.getHand().size() * (cardwidth + cardmargin),
                     y,
-                    cardheight / 3, color);
+                    cardheight / 4, color);
             renderString(g, "Markers: " + player.getMarkers(),
                     x + (int) (offset.f(q)) + player.getHand().size() * (cardwidth + cardmargin),
-                    y + cardheight * 1 / 3,
-                    cardheight / 3, color);
+                    y + cardheight * 1 / 4,
+                    cardheight / 4, color);
             renderString(g, "Bets: " + player.getBettedMarkers(),
                     x + (int) (offset.f(q)) + player.getHand().size() * (cardwidth + cardmargin),
-                    y + cardheight * 2 / 3,
-                    cardheight / 4, color);
+                    y + cardheight * 2 / 4,
+                    cardheight / 5, color);
+            renderString(g,
+                    HandRank.rank(CardCollection.join(getModel().getCommunityCards(), player.getHand())).toString(),
+                    x + (int) (offset.f(q)) + player.getHand().size() * (cardwidth + cardmargin),
+                    y + cardheight * 3 / 4,
+                    cardheight / 5, color);
+
         });
     }
 
@@ -227,6 +233,7 @@ public abstract class PokerFrame extends RenderableFrame {
             renderImage(g, image, x + margin, y + margin, width - margin * 2, height - margin * 2, alpha);
         } else {
             Card.Color color = card.getColor();
+            int value = card.getValue();
             switch (color) {
                 case DIAMONDS:
                     image = diamonds;
@@ -244,8 +251,27 @@ public abstract class PokerFrame extends RenderableFrame {
                     image = null;
                     break;
             }
+            String str;
+            switch (value) {
+                case 1:
+                    str = "E";
+                    break;
+                case 11:
+                    str = "J";
+                    break;
+                case 12:
+                    str = "Q";
+                    break;
+                case 13:
+                    str = "K";
+                    break;
+                default:
+                    str = String.valueOf(card.getValue());
+                    break;
+            }
             renderImage(g, image, x + margin, y + margin, width - margin * 2, height - margin * 2, alpha);
-            renderString(g, String.valueOf(card.getValue()), x, y, height / 4, new Color(0, 0, 0, alpha));
+
+            renderString(g, str, x, y, height / 4, new Color(0, 0, 0, alpha));
         }
     }
 

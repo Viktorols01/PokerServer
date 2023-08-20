@@ -6,7 +6,7 @@ public class HandRank {
 
     public HandRank() {
         this.value = 0;
-        this.cards = new CardCollection();
+        this.cards = null;
     }
 
     public HandRank(int value, CardCollection cards) {
@@ -16,10 +16,6 @@ public class HandRank {
 
     public int getValue() {
         return value;
-    }
-
-    public void setValue(int value) {
-        this.value = value;
     }
 
     public CardCollection getCards() {
@@ -34,16 +30,34 @@ public class HandRank {
         }
     }
 
-    public boolean greaterThan(HandRank rank) {
+    public int compare(HandRank rank) {
         if (this.getValue() > rank.getValue()) {
-            return true;
+            return 1;
         } else {
-            return false;
+            if (this.cards == null) {
+                return -1;
+            } else if (rank.cards == null) {
+                return 1;
+            }
+            for (int i = 0; i < 5; i++) {
+                if (this.cards.size() <= i) {
+                    return -1;
+                } else if (rank.cards.size() <= i) {
+                    return 1;
+                }
+                if (this.cards.get(i).getValue() > rank.cards.get(i).getValue()) {
+                    return 1;
+                } else if (this.cards.get(i).getValue() < rank.cards.get(i).getValue()) {
+                    return -1;
+                }
+            }
         }
+        return 0;
     }
 
     public static HandRank rank(CardCollection cardCollection) {
         CardGrid grid = getGrid(cardCollection);
+
         int i = 9;
         HandRank rank = null;
         while (rank == null) {
@@ -75,6 +89,8 @@ public class HandRank {
                 case 1:
                     rank = getHighCard(grid);
                     break;
+                case 0:
+                    rank = new HandRank(0, null);
             }
             i--;
         }
@@ -82,85 +98,138 @@ public class HandRank {
     }
 
     private static HandRank getHighCard(CardGrid grid) {
-        int maxValue = 0;
-        for (int colorIndex = 0; colorIndex < 4; colorIndex++) {
-            for (int value = 14; value > 0; value--) {
+        CardCollection cards = new CardCollection();
+        for (int value = 14; value > 1; value--) {
+            for (int colorIndex = 0; colorIndex < 4; colorIndex++) {
                 if (grid.hasCard(colorIndex, value)) {
-                    if (value > maxValue) {
-                        maxValue = value;
+                    cards.add(grid.getCard(colorIndex, value));
+                    if (cards.size() >= 5) {
+                        return new HandRank(1, cards);
                     }
                 }
+
             }
         }
-        return new HandRank(1, null);
+        if (cards.size() > 0) {
+            return new HandRank(1, cards);
+        } else {
+            return null;
+        }
     }
 
     private static HandRank getPair(CardGrid grid) {
+        CardCollection cards = new CardCollection();
+        int found = 0;
         for (int value = 14; value > 1; value--) {
-            if (grid.valueCount(value) == 2) {
-                return new HandRank(2, null);
+            CardCollection row = grid.getCardsOfValue(value);
+            if (row.size() == 2) {
+                for (Card card : row) {
+                    cards.pushFirstWithMaxSize(card, 5);
+                }
+                found++;
+            } else {
+                for (int colorIndex = 0; colorIndex < 4; colorIndex++) {
+                    if (grid.hasCard(colorIndex, value)) {
+                        cards.addWithMaxSize(grid.getCard(colorIndex, value), 5);
+                    }
+
+                }
+            }
+            if (cards.size() >= 5 && found == 1) {
+                return new HandRank(2, cards);
             }
         }
-        return null;
+        if (found == 1) {
+            return new HandRank(2, cards);
+        } else {
+            return null;
+        }
     }
 
     private static HandRank getTwoPair(CardGrid grid) {
-        int pairCounter = 0;
-        int maxValue = 0;
+        CardCollection cards = new CardCollection();
+        int found = 0;
         for (int value = 14; value > 1; value--) {
-            if (grid.valueCount(value) == 2) {
-                if (value > maxValue) {
-                    maxValue = value;
+            CardCollection row = grid.getCardsOfValue(value);
+            if (row.size() == 2) {
+                for (Card card : row) {
+                    cards.pushFirstWithMaxSize(card, 5);
                 }
-                pairCounter++;
+                found++;
+            } else {
+                for (int colorIndex = 0; colorIndex < 4; colorIndex++) {
+                    if (grid.hasCard(colorIndex, value)) {
+                        cards.addWithMaxSize(grid.getCard(colorIndex, value), 5);
+                    }
+                }
             }
-            if (pairCounter == 2) {
-                return new HandRank(3, null);
+            if (cards.size() >= 5 && found == 2) {
+                return new HandRank(3, cards);
             }
         }
-        return null;
+        if (found == 2) {
+            return new HandRank(3, cards);
+        } else {
+            return null;
+        }
     }
 
     private static HandRank getThreeOfAKind(CardGrid grid) {
+        CardCollection cards = new CardCollection();
+        int found = 0;
         for (int value = 14; value > 1; value--) {
-            if (grid.valueCount(value) == 3) {
-                return new HandRank(4, null);
+            CardCollection row = grid.getCardsOfValue(value);
+            if (row.size() == 3) {
+                for (Card card : row) {
+                    cards.pushFirstWithMaxSize(card, 5);
+                }
+                found++;
+            } else {
+                for (int colorIndex = 0; colorIndex < 4; colorIndex++) {
+                    if (grid.hasCard(colorIndex, value)) {
+                        cards.addWithMaxSize(grid.getCard(colorIndex, value), 5);
+                    }
+
+                }
+            }
+            if (cards.size() >= 5 && found == 1) {
+                return new HandRank(4, cards);
             }
         }
-        return null;
+        if (found == 1) {
+            return new HandRank(4, cards);
+        } else {
+            return null;
+        }
     }
 
     private static HandRank getStraight(CardGrid grid) {
-        int startValue = 14;
-        int counter = 0;
+        CardCollection cards = new CardCollection();
         for (int value = 14; value > 0; value--) {
-            if (grid.valueCount(value) > 0) {
-                counter++;
+            CardCollection row = grid.getCardsOfValue(value);
+            if (row.size() > 0) {
+                cards.add(row.get(0));
             } else {
-                startValue = value - 1;
-                counter = 0;
+                cards.clear();
             }
 
-            if (counter == 5) {
-                return new HandRank(5, null);
+            if (cards.size() >= 5) {
+                return new HandRank(5, cards);
             }
         }
         return null;
     }
 
     private static HandRank getFlush(CardGrid grid) {
-        int maxValue = 0;
+        CardCollection cards = new CardCollection();
         for (int colorIndex = 0; colorIndex < 4; colorIndex++) {
-            int counter = 0;
+            cards.clear();
             for (int value = 14; value > 1; value--) {
                 if (grid.hasCard(colorIndex, value)) {
-                    if (value > maxValue) {
-                        maxValue = value;
-                    }
-                    counter++;
+                    cards.add(grid.getCard(colorIndex, value));
                 }
-                if (counter == 5) {
-                    return new HandRank(6, null);
+                if (cards.size() >= 5) {
+                    return new HandRank(6, cards);
                 }
             }
         }
@@ -168,61 +237,67 @@ public class HandRank {
     }
 
     private static HandRank getFullHouse(CardGrid grid) {
-        int tripleValue = 0;
-        int doubleValue = 0;
+        CardCollection cards = new CardCollection();
+        int found = 0;
         for (int value = 14; value > 1; value--) {
-            if (grid.valueCount(value) == 3) {
-                if (value > tripleValue) {
-                    tripleValue = value;
+            CardCollection row = grid.getCardsOfValue(value);
+            if (row.size() == 3) {
+                for (Card card : row) {
+                    cards.pushFirstWithMaxSize(card, 5);
                 }
-            } else if (grid.valueCount(value) >= 2) {
-                if (value > doubleValue) {
-                    doubleValue = value;
+                found++;
+            } else if (row.size() == 2) {
+                for (Card card : row) {
+                    cards.addWithMaxSize(card, 5);
                 }
             }
-            if (tripleValue > 0 && doubleValue > 0) {
-                return new HandRank(7, null);
+            if (cards.size() >= 5 && found == 1) {
+                return new HandRank(7, cards);
             }
         }
         return null;
     }
 
     private static HandRank getFourOfAKind(CardGrid grid) {
+        CardCollection cards = new CardCollection();
+        int found = 0;
         for (int value = 14; value > 1; value--) {
-            if (grid.valueCount(value) == 4) {
-                return new HandRank(8, null);
+            CardCollection row = grid.getCardsOfValue(value);
+            if (row.size() == 4) {
+                for (Card card : row) {
+                    cards.pushFirstWithMaxSize(card, 5);
+                }
+                found++;
+            } else {
+                for (int colorIndex = 0; colorIndex < 4; colorIndex++) {
+                    if (grid.hasCard(colorIndex, value)) {
+                        cards.addWithMaxSize(grid.getCard(colorIndex, value), 5);
+                    }
+
+                }
+            }
+            if (cards.size() >= 5 && found == 1) {
+                return new HandRank(8, cards);
             }
         }
         return null;
     }
 
     private static HandRank getStraightFlush(CardGrid grid) {
-        int startValue = 14;
-        int counter = 0;
+        CardCollection cards = new CardCollection();
         for (int colorIndex = 0; colorIndex < 4; colorIndex++) {
-            counter = 0;
             for (int value = 14; value > 0; value--) {
                 if (grid.hasCard(colorIndex, value)) {
-                    counter++;
+                    cards.add(grid.getCard(colorIndex, value));
                 } else {
-                    startValue = value - 1;
-                    counter = 0;
+                    cards.clear();
                 }
-
-                if (counter == 5) {
-                    return new HandRank(9, null);
+                if (cards.size() >= 5) {
+                    return new HandRank(9, cards);
                 }
             }
         }
         return null;
-    }
-
-    private static CardGrid getGrid(CardCollection cardCollection) {
-        CardGrid grid = new CardGrid();
-        for (Card card : cardCollection) {
-            grid.addCard(card);
-        }
-        return grid;
     }
 
     private static class CardGrid {
@@ -233,6 +308,9 @@ public class HandRank {
         }
 
         private void addCard(Card card) {
+            if (card == null) {
+                return;
+            }
             int value = card.getValue();
             int colorIndex = card.getColor().ordinal();
             if (value == 1) {
@@ -249,51 +327,68 @@ public class HandRank {
             return this.grid[colorIndex][value - 1];
         }
 
-        private int valueCount(int value) {
-            int counter = 0;
+        private CardCollection getCardsOfValue(int value) {
+            CardCollection cards = new CardCollection();
             for (int colorIndex = 0; colorIndex < 4; colorIndex++) {
                 if (hasCard(colorIndex, value)) {
-                    counter++;
+                    cards.add(getCard(colorIndex, value));
                 }
             }
-            return counter;
+            return cards;
         }
+    }
+
+    private static CardGrid getGrid(CardCollection cardCollection) {
+        CardGrid grid = new CardGrid();
+        for (Card card : cardCollection) {
+            grid.addCard(card);
+        }
+        return grid;
     }
 
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
         switch (this.value) {
+            case 0:
+                str.append("Unknown");
+                break;
             case 1:
-                str.append("High card ");
+                str.append("High card");
                 break;
             case 2:
-                str.append("Pairs ");
+                str.append("Pairs");
                 break;
             case 3:
-                str.append("Two pairs ");
+                str.append("Two pairs");
                 break;
             case 4:
-                str.append("Three of a kind ");
+                str.append("Three of a kind");
                 break;
             case 5:
-                str.append("Straight ");
+                str.append("Straight");
                 break;
             case 6:
-                str.append("Flush ");
+                str.append("Flush");
                 break;
             case 7:
-                str.append("Full house ");
+                str.append("Full house");
                 break;
             case 8:
-                str.append("Four of a kind ");
+                str.append("Four of a kind");
                 break;
             case 9:
-                str.append("Straight flush ");
+                str.append("Straight flush");
                 break;
             case 10:
-                str.append("Royal flush ");
+                str.append("Royal flush");
                 break;
+        }
+        if (cards != null) {
+            if (cards.size() > 0) {
+                str.append(" ");
+                str.append(cards.get(0).getValue());
+            }
         }
         return str.toString();
     }
