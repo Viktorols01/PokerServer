@@ -3,6 +3,7 @@ package server;
 import java.io.IOException;
 import java.net.Socket;
 
+import comms.Broadcaster;
 import comms.Connection;
 import comms.Protocol;
 import comms.Protocol.Command;
@@ -12,13 +13,13 @@ public class PokerServer extends Server {
 
     private HoldEm game;
     private Thread gameThread;
+    private Broadcaster joinedSender;
 
-    private Broadcaster broadcaster;
 
     public PokerServer(int port) {
         super(port);
         this.game = new HoldEm(this);
-        this.broadcaster = new Broadcaster();
+        this.joinedSender = new Broadcaster();
     }
 
     public void startGame() {
@@ -60,7 +61,7 @@ public class PokerServer extends Server {
                                 + " tried to connect but " + name + " was taken.");
                     } else {
                         addConnection(connection, name);
-                        broadcaster.broadcast("player joined");
+                        this.joinedSender.broadcast();
                     }
                 } else {
                     rejectConnection(connection, socket.getInetAddress().getHostAddress()
@@ -85,7 +86,7 @@ public class PokerServer extends Server {
                                 setType(connection, type);
                                 break;
                             default:
-                                Protocol.sendPackage(Protocol.Command.DENIED, new String[] { "Invalid type" },
+                                Protocol.sendPackage(Protocol.Command.DENIED_TYPE, new String[] { "Invalid type" },
                                         connection);
                                 break;
                         }
@@ -103,7 +104,7 @@ public class PokerServer extends Server {
         return this.game;
     }
 
-    public Broadcaster getBroadcaster() {
-        return this.broadcaster;
+    public Broadcaster getJoinedSender() {
+        return this.joinedSender;
     }
 }

@@ -40,7 +40,6 @@ public abstract class Server {
         this.open = false;
         this.joinListener.interrupt();
         System.out.println("Listening for connections closed.");
-
     }
 
     protected abstract void joinListen();
@@ -51,20 +50,21 @@ public abstract class Server {
         System.out
                 .println(connection.getSocket().getInetAddress().getHostAddress() + " connected as " + name
                         + ".");
-        Protocol.sendPackage(Protocol.Command.ACCEPTED, new String[0], connection);
+        String[] arguments = new String[] {};
+        Protocol.sendPackage(Protocol.Command.ACCEPTED_JOIN, arguments, connection);
     }
 
     protected final static void rejectConnection(Connection connection, String reason) {
         System.out
                 .println(connection.getSocket().getInetAddress().getHostAddress() + " was rejected.");
-        Protocol.sendPackage(Protocol.Command.DENIED, new String[] { reason }, connection);
+        Protocol.sendPackage(Protocol.Command.DENIED_JOIN, new String[] { reason }, connection);
         connection.close();
     }
 
     protected final static void setType(Connection connection, Type type) {
         connection.setType(type);
         System.out.println(connection.getName() + " changed to " + type);
-        Protocol.sendPackage(Protocol.Command.ACCEPTED, new String[] {}, connection);
+        Protocol.sendPackage(Protocol.Command.ACCEPTED_JOIN, new String[] {}, connection);
     }
 
     public String getIP() {

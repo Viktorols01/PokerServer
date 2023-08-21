@@ -30,6 +30,8 @@ public abstract class PokerClient {
 
     protected abstract String[] getMove(HoldEmModel model);
 
+    protected abstract String[] getContinue();
+
     protected abstract void display(HoldEmModel model);
 
     protected abstract void parseMessage(String message);
@@ -54,9 +56,9 @@ public abstract class PokerClient {
                         sendCommand(Protocol.Command.SEND_MOVE, arguments);
                         break;
                     }
-                    case ACCEPTED:
-                        break;
-                    case DENIED: {
+                    case REQUEST_CONTINUE: {
+                        String[] arguments = getContinue();
+                        sendCommand(Protocol.Command.SEND_CONTINUE, arguments);
                         break;
                     }
                     case SEND_POKERSTATE: {

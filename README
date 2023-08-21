@@ -7,10 +7,20 @@ Protocol commands:
     SEND_NAME
         (name)
 
+    ACCEPTED_JOIN
+
+    DENIED_JOIN
+        (reason)
+
     REQUEST_TYPE
 
     SEND_TYPE
         (type)
+
+    ACCEPTED_TYPE
+
+    DENIED_TYPE
+        (reason)
 
     SEND_POKERSTATE
         (amount of players)
@@ -28,18 +38,22 @@ Protocol commands:
         (small blind)
         (minimum bet)
 
+    REQUEST_CONTINUE
+
+    SEND_CONTINUE
+
     REQUEST_MOVE
 
     SEND_MOVE
         (move)
 
+    ACCEPTED_MOVE
+
+    DENIED_MOVE
+        (reason)
+
     SEND_MESSAGE
         (message)
-
-    ACCEPTED
-
-    DENIED
-        (reason)
 
     UNKNOWN_COMMAND
 

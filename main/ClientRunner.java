@@ -39,6 +39,11 @@ public class ClientRunner {
         }
 
         @Override
+        protected String[] getContinue() {
+            return new String[] {};
+        }
+
+        @Override
         protected void display(HoldEmModel model) {
             pokerframe.updateModel(model);
         }

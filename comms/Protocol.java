@@ -12,18 +12,27 @@ public class Protocol {
         REQUEST_NAME,
         SEND_NAME,
 
+        ACCEPTED_JOIN,
+        DENIED_JOIN,
+
         REQUEST_TYPE,
         SEND_TYPE,
 
+        ACCEPTED_TYPE,
+        DENIED_TYPE,
+
         SEND_POKERSTATE,
+
+        REQUEST_CONTINUE,
+        SEND_CONTINUE,
 
         REQUEST_MOVE,
         SEND_MOVE,
 
-        SEND_MESSAGE,
+        ACCEPTED_MOVE,
+        DENIED_MOVE,
 
-        ACCEPTED,
-        DENIED,
+        SEND_MESSAGE,
 
         UNKNOWN_COMMAND;
     }
@@ -49,10 +58,24 @@ public class Protocol {
                 String name = connection.nextLine();
                 return new String[] { name };
             }
+            case ACCEPTED_JOIN:
+                return new String[] {};
+            case DENIED_JOIN: {
+                String reason = connection.nextLine();
+                return new String[] { reason };
+            }
+            case REQUEST_TYPE:
+                return new String[] {};
             case SEND_TYPE:
                 String type = connection.nextLine();
                 return new String[] { type };
-
+            case ACCEPTED_TYPE: {
+                return new String[] {};
+            }
+            case DENIED_TYPE: {
+                String reason = connection.nextLine();
+                return new String[] { reason };
+            }
             case SEND_POKERSTATE:
                 Stack<String> arguments = new Stack<String>();
 
@@ -92,24 +115,27 @@ public class Protocol {
                 arguments.push(minBet);
 
                 return arguments.toArray(String[]::new);
-
+            case REQUEST_CONTINUE:
+                return new String[] {};
+            case SEND_CONTINUE:
+                return new String[] {};
             case REQUEST_MOVE:
                 return new String[] {};
-
             case SEND_MOVE:
                 String move = connection.nextLine();
                 String amount = connection.nextLine();
                 return new String[] { move, amount };
-
+            case ACCEPTED_MOVE: {
+                return new String[] {};
+            }
+            case DENIED_MOVE: {
+                String reason = connection.nextLine();
+                return new String[] { reason };
+            }
             case SEND_MESSAGE:
                 String message = connection.nextLine();
                 return new String[] { message };
 
-            case ACCEPTED:
-                return new String[] {};
-            case DENIED:
-                String reason = connection.nextLine();
-                return new String[] { reason };
             case UNKNOWN_COMMAND:
                 return new String[] {};
             default:

@@ -8,8 +8,8 @@ import java.awt.FlowLayout;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JToggleButton;
 
+import comms.Broadcaster;
 import comms.Connection;
 import server.PokerServer;
 
@@ -20,8 +20,6 @@ public class ServerFrame extends PokerFrame {
     private JButton openButton;
     private JButton closeButton;
     private JButton startButton;
-    private JToggleButton continueGameButton;
-    private boolean continueGame;
 
     private Thread gameListener;
     private Thread joinListener;
@@ -38,10 +36,11 @@ public class ServerFrame extends PokerFrame {
     private void addListeners() {
         gameListener = new Thread(() -> {
             while (true) {
-                try {
-                    String message = server.getGame().getBroadcaster().receive();
+                try {        
+                    Broadcaster updateSender = server.getGame().getUpdateSender();
+                    updateSender.receive();
                     updateModel(server.getGame().getHoldEmModel());
-                    updateMessage(message);
+                    updateMessage(server.getGame().getMessage());
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -51,7 +50,8 @@ public class ServerFrame extends PokerFrame {
         joinListener = new Thread(() -> {
             while (true) {
                 try {
-                    server.getBroadcaster().receive("player joined");
+                    Broadcaster joinedSender = server.getJoinedSender();
+                    joinedSender.receive();
                     updateRenderables();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -82,17 +82,6 @@ public class ServerFrame extends PokerFrame {
             server.startGame();
         });
         container.add(startButton);
-        continueGameButton = new JToggleButton("pause");
-        continueGameButton.addActionListener((e) -> {
-            if (continueGame) {
-                continueGame = false;
-                continueGameButton.setText("resume");
-            } else {
-                continueGame = true;
-                continueGameButton.setText("pause");
-            }
-        });
-        container.add(continueGameButton);
         jframe.add(getGUI(), BorderLayout.CENTER);
         jframe.add(container, BorderLayout.SOUTH);
     }

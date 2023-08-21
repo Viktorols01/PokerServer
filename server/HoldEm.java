@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
+import comms.Broadcaster;
 import comms.Connection;
 import comms.Protocol;
 import poker.Card;
@@ -15,7 +16,7 @@ import poker.HoldEmModel;
 
 public class HoldEm {
     private PokerServer server;
-    private Broadcaster broadcaster;
+    private Broadcaster updateSender;
 
     private List<PokerPlayer> players;
     private PokerPlayer toPlay;
@@ -29,18 +30,17 @@ public class HoldEm {
 
     private int smallBlindIndex;
 
-    private static final int TIMEFACTOR = 0;
+    private String message;
 
     public HoldEm(PokerServer server) {
         this.server = server;
-        this.broadcaster = new Broadcaster();
+        this.updateSender = new Broadcaster();
         this.players = Collections.synchronizedList(new ArrayList<PokerPlayer>());
         this.smallBlindIndex = 0;
     }
 
     public void setup() {
         this.setupBlinds();
-        sendMessage("Welcome!");
     }
 
     public void play() {
@@ -155,7 +155,7 @@ public class HoldEm {
                 continue;
             }
 
-            sendGameInfo(player.getName() + " to play.", false, 1000);
+            sendGameInfo(player.getName() + " to play.", false);
 
             System.out.println("REQUEST_MOVE to " + player.getConnection().getName());
             Protocol.sendPackage(Protocol.Command.REQUEST_MOVE, new String[] {}, player.getConnection());
@@ -178,7 +178,7 @@ public class HoldEm {
                     case "check": {
                         int remaining = this.minBet - player.getPlayerData().getBettedMarkers();
                         player.getPlayerData().bet(remaining);
-                        Protocol.sendPackage(Protocol.Command.ACCEPTED, new String[] {}, player.getConnection());
+                        Protocol.sendPackage(Protocol.Command.ACCEPTED_MOVE, new String[] {}, player.getConnection());
                         break;
                     }
                     case "raise": {
@@ -188,28 +188,26 @@ public class HoldEm {
                             this.minBet += n - remaining;
                             betsRemaining = (playerCount - 1);
                         }
-                        Protocol.sendPackage(Protocol.Command.ACCEPTED, new String[] {}, player.getConnection());
-                        sendMessage(player.getConnection().getName() + " raised by " + (n - remaining) + ".");
+                        Protocol.sendPackage(Protocol.Command.ACCEPTED_MOVE, new String[] {}, player.getConnection());
                         break;
                     }
                     case "fold": {
                         player.getPlayerData().setFolded(true);
                         choices--;
-                        Protocol.sendPackage(Protocol.Command.ACCEPTED, new String[] {}, player.getConnection());
-                        sendMessage(player.getConnection().getName() + " folded.");
+                        Protocol.sendPackage(Protocol.Command.ACCEPTED_MOVE, new String[] {}, player.getConnection());
                         break;
                     }
                     default:
                         player.getPlayerData().setFolded(true);
                         choices--;
-                        Protocol.sendPackage(Protocol.Command.DENIED, new String[] { "Unknown move" },
+                        Protocol.sendPackage(Protocol.Command.DENIED_MOVE, new String[] { "Unknown move" },
                                 player.getConnection());
-                        sendMessage(player.getConnection().getName() + " folded.");
                         break;
                 }
             } else {
                 player.getPlayerData().setFolded(true);
-                Protocol.sendPackage(Protocol.Command.DENIED, new String[] { "Wrong command" }, player.getConnection());
+                Protocol.sendPackage(Protocol.Command.DENIED_MOVE, new String[] { "Unknown command" },
+                        player.getConnection());
             }
         }
     }
@@ -278,7 +276,7 @@ public class HoldEm {
             winnerNames.append(winner.getName());
             winnerNames.append(" ");
         }
-        sendGameInfo(winnerNames + "won!", true, 3000);
+        sendGameInfo(winnerNames + "won!", true);
         if (done) {
             for (int i = players.size() - 1; i >= 0; i--) {
                 PokerPlayer player = players.get(i);
@@ -293,6 +291,10 @@ public class HoldEm {
 
     public HoldEmModel getHoldEmModel() {
         return new HoldEmModel(toPokerState(null, true));
+    }
+
+    public String getMessage() {
+        return this.message;
     }
 
     private String[] toPokerState(Connection connection, boolean show) {
@@ -356,24 +358,29 @@ public class HoldEm {
         return arguments.toArray(String[]::new);
     }
 
-    private void sendGameInfo(String message, boolean show, int sleep) {
+    private void sendGameInfo(String message, boolean show) {
+        String[] arguments;
         for (Connection connection : server.getConnections()) {
-            String[] arguments = toPokerState(connection, show);
+            arguments = toPokerState(connection, show);
             Protocol.sendPackage(Protocol.Command.SEND_POKERSTATE, arguments, connection);
+            arguments = new String[] { message };
+            Protocol.sendPackage(Protocol.Command.SEND_MESSAGE, arguments, connection);
         }
-        sendMessage(message);
-        broadcaster.broadcast(message);
-        try {
-            Thread.sleep(sleep * TIMEFACTOR);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        this.message = message;
+        updateSender.broadcast();
+
+        requestContinue();
     }
 
-    private void sendMessage(String message) {
+    private void requestContinue() {
         for (Connection connection : server.getConnections()) {
-            String[] arguments = new String[] { message };
-            Protocol.sendPackage(Protocol.Command.SEND_MESSAGE, arguments, connection);
+            if (connection.getType() == Connection.Type.SPECTATOR) {
+                Protocol.sendPackage(Protocol.Command.REQUEST_CONTINUE, new String[] {}, connection);
+                Protocol.Command command = Protocol.readCommand(connection);
+                if (command == Protocol.Command.SEND_CONTINUE) {
+                    break;
+                } 
+            }
         }
     }
 
@@ -385,7 +392,7 @@ public class HoldEm {
         return this.players.size();
     }
 
-    public Broadcaster getBroadcaster() {
-        return this.broadcaster;
+    public Broadcaster getUpdateSender() {
+        return this.updateSender;
     }
 }
