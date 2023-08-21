@@ -171,16 +171,26 @@ public class HoldEm {
                 }
                 value = Math.max(0, value);
 
+                int remaining = this.minBet - player.getPlayerData().getBettedMarkers();
+
                 switch (move) {
                     case "match":
-                    case "check": {
-                        int remaining = this.minBet - player.getPlayerData().getBettedMarkers();
                         player.getPlayerData().bet(remaining);
                         Protocol.sendPackage(Protocol.Command.ACCEPTED_MOVE, new String[] {}, player.getConnection());
                         break;
+                    case "check": {
+                        if (remaining == 0) {
+                            Protocol.sendPackage(Protocol.Command.ACCEPTED_MOVE, new String[] {},
+                                    player.getConnection());
+                        } else {
+                            player.getPlayerData().setFolded(true);
+                            choices--;
+                            Protocol.sendPackage(Protocol.Command.ACCEPTED_MOVE, new String[] {},
+                                    player.getConnection());
+                        }
+                        break;
                     }
                     case "raise": {
-                        int remaining = this.minBet - player.getPlayerData().getBettedMarkers();
                         int n = player.getPlayerData().bet(value + remaining);
                         if (n > remaining) {
                             this.minBet += n - remaining;

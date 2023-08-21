@@ -49,7 +49,6 @@ public abstract class PokerClient {
                         break;
                     }
                     case ACCEPTED_JOIN: {
-                        JOptionPane.showMessageDialog(null, "Your client has joined successfully!");
                         break;
                     }
                     case DENIED_JOIN: {

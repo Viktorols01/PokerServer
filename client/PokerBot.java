@@ -6,6 +6,10 @@ public abstract class PokerBot {
 
     public abstract String[] getMove(HoldEmModel model);
 
+    protected static String[] match() {
+        return new String[] { "match", "0" };
+    }
+    
     protected static String[] check() {
         return new String[] { "check", "0" };
     }
