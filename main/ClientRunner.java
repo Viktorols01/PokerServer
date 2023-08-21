@@ -1,57 +1,47 @@
 package main;
 
+import javax.swing.JOptionPane;
+
+import client.BotClient;
 import client.PokerClient;
-import frames.PlayerFrame;
-import poker.HoldEmModel;
+import client.SpectatorClient;
+import client.YouClient;
 
 public class ClientRunner {
     public static void main(String[] args) {
-        PokerClient client = new MyClient(false);
-        client.connect("localhost", 50160);
+        String[] options = new String[] { "Let a bot play", "Let you play", "Let you watch", "Cancel" };
+        loop: while (true) {
+            String option = getOption(options);
+            
+            PokerClient client;
+            switch (option) {
+                case "Let a bot play":
+                    client = new BotClient(getName(), new MyBot(), true);
+                    break;
+                case "Let you play":
+                    client = new YouClient(getName(), false);
+                    break;
+                case "Let you watch":
+                    client = new SpectatorClient(getName(), false);
+                    break;
+                case "Cancel":
+                    break loop;
+                default:
+                    break loop;
+            }
+            client.connect("localhost", 50160);
+        }
     }
 
-    private static class MyClient extends PokerClient {
+    public static String getOption(String[] options) {
+        int response = JOptionPane.showOptionDialog(null, "What is your client going to do?", "Pick an option.",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE,
+                null, options, options[0]);
+        return options[response];
+    }
 
-        PlayerFrame pokerframe;
-
-        public MyClient(boolean verbose) {
-            super(verbose);
-            this.pokerframe = new PlayerFrame(1200, 800);
-        }
-
-        @Override
-        protected void setup() {
-        }
-
-        @Override
-        protected String[] getName() {
-            return new String[] { "Your name" };
-        }
-
-        @Override
-        protected String[] getType() {
-            return new String[] { "player" };
-        }
-
-        @Override
-        protected String[] getMove(HoldEmModel model) {
-            return pokerframe.getMove();
-        }
-
-        @Override
-        protected String[] getContinue() {
-            return new String[] {};
-        }
-
-        @Override
-        protected void display(HoldEmModel model) {
-            pokerframe.updateModel(model);
-        }
-
-        @Override
-        protected void parseMessage(String message) {
-            pokerframe.updateMessage(message);
-        }
-
+    public static String getName() {
+        String response = JOptionPane.showInputDialog("What is your client going to be named?");
+        return response;
     }
 }

@@ -157,10 +157,8 @@ public class HoldEm {
 
             sendGameInfo(player.getName() + " to play.", false);
 
-            System.out.println("REQUEST_MOVE to " + player.getConnection().getName());
             Protocol.sendPackage(Protocol.Command.REQUEST_MOVE, new String[] {}, player.getConnection());
             Protocol.Command command = Protocol.readCommand(player.getConnection());
-            System.out.println(command + " from " + player.getConnection().getName());
 
             if (command == Protocol.Command.SEND_MOVE) {
                 String[] arguments = Protocol.readArguments(command, player.getConnection());
@@ -200,7 +198,7 @@ public class HoldEm {
                     default:
                         player.getPlayerData().setFolded(true);
                         choices--;
-                        Protocol.sendPackage(Protocol.Command.DENIED_MOVE, new String[] { "Unknown move" },
+                        Protocol.sendPackage(Protocol.Command.DENIED_MOVE, new String[] { "Unknown move: " + move },
                                 player.getConnection());
                         break;
                 }
@@ -373,13 +371,14 @@ public class HoldEm {
     }
 
     private void requestContinue() {
-        for (Connection connection : server.getConnections()) {
-            if (connection.getType() == Connection.Type.SPECTATOR) {
-                Protocol.sendPackage(Protocol.Command.REQUEST_CONTINUE, new String[] {}, connection);
-                Protocol.Command command = Protocol.readCommand(connection);
-                if (command == Protocol.Command.SEND_CONTINUE) {
-                    break;
-                } 
+        for (int i = 0; i < server.getConnections().size(); i++) {
+            Connection connection = server.getConnections().get(i);
+            Protocol.sendPackage(Protocol.Command.REQUEST_CONTINUE, new String[] {}, connection);
+            Protocol.Command command = Protocol.readCommand(connection);
+            if (command == Protocol.Command.SEND_CONTINUE) {
+                continue;
+            } else {
+                i--;
             }
         }
     }

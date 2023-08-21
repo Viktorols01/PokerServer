@@ -64,7 +64,11 @@ public abstract class Server {
     protected final static void setType(Connection connection, Type type) {
         connection.setType(type);
         System.out.println(connection.getName() + " changed to " + type);
-        Protocol.sendPackage(Protocol.Command.ACCEPTED_JOIN, new String[] {}, connection);
+        Protocol.sendPackage(Protocol.Command.ACCEPTED_TYPE, new String[] {}, connection);
+    }
+
+    public boolean isOpen() {
+        return this.open;
     }
 
     public String getIP() {

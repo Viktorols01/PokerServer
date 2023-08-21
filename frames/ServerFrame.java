@@ -36,7 +36,7 @@ public class ServerFrame extends PokerFrame {
     private void addListeners() {
         gameListener = new Thread(() -> {
             while (true) {
-                try {        
+                try {
                     Broadcaster updateSender = server.getGame().getUpdateSender();
                     updateSender.receive();
                     updateModel(server.getGame().getHoldEmModel());
@@ -70,16 +70,22 @@ public class ServerFrame extends PokerFrame {
         openButton = new JButton("open");
         openButton.addActionListener((e) -> {
             server.openConnections();
+            updateRenderables();
         });
         container.add(openButton);
         closeButton = new JButton("close");
         closeButton.addActionListener((e) -> {
             server.closeConnections();
+            updateRenderables();
         });
         container.add(closeButton);
         startButton = new JButton("start");
         startButton.addActionListener((e) -> {
+            server.closeConnections();
             server.startGame();
+            openButton.setVisible(false);
+            closeButton.setVisible(false);
+            startButton.setVisible(false);
         });
         container.add(startButton);
         jframe.add(getGUI(), BorderLayout.CENTER);
@@ -124,7 +130,8 @@ public class ServerFrame extends PokerFrame {
             final int height = 50;
             final int width = 500;
             final int margin = 10;
-            addStringBox("Server has not started yet!", margin, margin, width * 2, height * 2, margin * 2);
+            addStringBox("Server is " + (server.isOpen() ? "open" : "closed") + ".", margin, margin, width * 2,
+                    height * 2, margin * 2);
             for (int i = 0; i < server.getConnections().size(); i++) {
                 Connection connection = server.getConnections().get(i);
                 addStringBox(connection.getName() + " (" + connection.getIP() + ")", margin,

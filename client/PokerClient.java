@@ -1,5 +1,7 @@
 package client;
 
+import javax.swing.JOptionPane;
+
 import comms.Connection;
 import comms.Protocol;
 import poker.HoldEmModel;
@@ -46,6 +48,15 @@ public abstract class PokerClient {
                         sendCommand(Protocol.Command.SEND_NAME, arguments);
                         break;
                     }
+                    case ACCEPTED_JOIN: {
+                        JOptionPane.showMessageDialog(null, "Your client has joined successfully!");
+                        break;
+                    }
+                    case DENIED_JOIN: {
+                        String[] arguments = Protocol.readArguments(Protocol.Command.DENIED_JOIN, connection);
+                        JOptionPane.showMessageDialog(null, "Your client has been denied! Reason:" + arguments[0]);
+                        break;
+                    }
                     case REQUEST_TYPE: {
                         String[] arguments = getType();
                         sendCommand(Protocol.Command.SEND_TYPE, arguments);
@@ -54,6 +65,12 @@ public abstract class PokerClient {
                     case REQUEST_MOVE: {
                         String[] arguments = getMove(model);
                         sendCommand(Protocol.Command.SEND_MOVE, arguments);
+                        break;
+                    }
+                    case DENIED_MOVE: {
+                        String[] arguments = Protocol.readArguments(Protocol.Command.DENIED_MOVE, connection);
+                        JOptionPane.showMessageDialog(null,
+                                "Your clients move has been denied! Reason:" + arguments[0]);
                         break;
                     }
                     case REQUEST_CONTINUE: {
@@ -117,7 +134,7 @@ public abstract class PokerClient {
 
         public void print(String message) {
             if (this.print) {
-                System.out.println("Client "+message);
+                System.out.println("Client " + message);
             }
         }
     }
