@@ -172,7 +172,6 @@ public class HoldEm {
                 value = Math.max(0, value);
 
                 int remaining = this.minBet - player.getPlayerData().getBettedMarkers();
-
                 switch (move) {
                     case "match":
                         player.getPlayerData().bet(remaining);

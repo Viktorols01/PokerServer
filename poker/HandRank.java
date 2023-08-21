@@ -22,17 +22,11 @@ public class HandRank {
         return cards;
     }
 
-    public boolean equal(HandRank rank) {
-        if (this.getValue() == rank.getValue()) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     public int compare(HandRank rank) {
         if (this.getValue() > rank.getValue()) {
             return 1;
+        } else if (this.getValue() < rank.getValue()) {
+            return -1;
         } else {
             if (this.cards == null) {
                 return -1;
@@ -91,6 +85,7 @@ public class HandRank {
                     break;
                 case 0:
                     rank = new HandRank(0, null);
+                    break;
             }
             i--;
         }
