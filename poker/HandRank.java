@@ -4,28 +4,33 @@ public class HandRank {
     private int value;
     private CardCollection cards;
 
+    private final static int MAXCARDS = 5;
+
     public HandRank() {
         this.value = 0;
         this.cards = null;
     }
 
-    public HandRank(int value, CardCollection cards) {
+    public HandRank(int value, int kickerValue) {
+        this.value = value;
+        this.cards = new CardCollection();
+        this.cards.add(new Card(null, kickerValue));
+    }
+
+    public HandRank(int value) {
+        this.value = value;
+        this.cards = null;
+    }
+
+    private HandRank(int value, CardCollection cards) {
         this.value = value;
         this.cards = cards;
     }
 
-    public int getValue() {
-        return value;
-    }
-
-    public CardCollection getCards() {
-        return cards;
-    }
-
     public int compare(HandRank rank) {
-        if (this.getValue() > rank.getValue()) {
+        if (this.value > rank.value) {
             return 1;
-        } else if (this.getValue() < rank.getValue()) {
+        } else if (this.value < rank.value) {
             return -1;
         } else {
             if (this.cards == null) {
@@ -33,7 +38,7 @@ public class HandRank {
             } else if (rank.cards == null) {
                 return 1;
             }
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < MAXCARDS; i++) {
                 if (this.cards.size() <= i) {
                     return -1;
                 } else if (rank.cards.size() <= i) {
@@ -84,7 +89,7 @@ public class HandRank {
                     rank = getHighCard(grid);
                     break;
                 case 0:
-                    rank = new HandRank(0, null);
+                    rank = new HandRank(0);
                     break;
             }
             i--;
@@ -98,7 +103,7 @@ public class HandRank {
             for (int colorIndex = 0; colorIndex < 4; colorIndex++) {
                 if (grid.hasCard(colorIndex, value)) {
                     cards.add(grid.getCard(colorIndex, value));
-                    if (cards.size() >= 5) {
+                    if (cards.size() >= MAXCARDS) {
                         return new HandRank(1, cards);
                     }
                 }
@@ -119,18 +124,18 @@ public class HandRank {
             CardCollection row = grid.getCardsOfValue(value);
             if (row.size() == 2) {
                 for (Card card : row) {
-                    cards.pushFirstWithMaxSize(card, 5);
+                    cards.pushFirstWithMaxSize(card, MAXCARDS);
                 }
                 found++;
             } else {
                 for (int colorIndex = 0; colorIndex < 4; colorIndex++) {
                     if (grid.hasCard(colorIndex, value)) {
-                        cards.addWithMaxSize(grid.getCard(colorIndex, value), 5);
+                        cards.addWithMaxSize(grid.getCard(colorIndex, value), MAXCARDS);
                     }
 
                 }
             }
-            if (cards.size() >= 5 && found == 1) {
+            if (cards.size() >= MAXCARDS && found == 1) {
                 return new HandRank(2, cards);
             }
         }
@@ -148,17 +153,17 @@ public class HandRank {
             CardCollection row = grid.getCardsOfValue(value);
             if (row.size() == 2) {
                 for (Card card : row) {
-                    cards.pushFirstWithMaxSize(card, 5);
+                    cards.pushFirstWithMaxSize(card, MAXCARDS);
                 }
                 found++;
             } else {
                 for (int colorIndex = 0; colorIndex < 4; colorIndex++) {
                     if (grid.hasCard(colorIndex, value)) {
-                        cards.addWithMaxSize(grid.getCard(colorIndex, value), 5);
+                        cards.addWithMaxSize(grid.getCard(colorIndex, value), MAXCARDS);
                     }
                 }
             }
-            if (cards.size() >= 5 && found == 2) {
+            if (cards.size() >= MAXCARDS && found == 2) {
                 return new HandRank(3, cards);
             }
         }
@@ -176,18 +181,17 @@ public class HandRank {
             CardCollection row = grid.getCardsOfValue(value);
             if (row.size() == 3) {
                 for (Card card : row) {
-                    cards.pushFirstWithMaxSize(card, 5);
+                    cards.pushFirstWithMaxSize(card, MAXCARDS);
                 }
                 found++;
             } else {
                 for (int colorIndex = 0; colorIndex < 4; colorIndex++) {
                     if (grid.hasCard(colorIndex, value)) {
-                        cards.addWithMaxSize(grid.getCard(colorIndex, value), 5);
+                        cards.addWithMaxSize(grid.getCard(colorIndex, value), MAXCARDS);
                     }
-
                 }
             }
-            if (cards.size() >= 5 && found == 1) {
+            if (cards.size() >= MAXCARDS && found == 1) {
                 return new HandRank(4, cards);
             }
         }
@@ -208,7 +212,7 @@ public class HandRank {
                 cards.clear();
             }
 
-            if (cards.size() >= 5) {
+            if (cards.size() >= MAXCARDS) {
                 return new HandRank(5, cards);
             }
         }
@@ -223,7 +227,7 @@ public class HandRank {
                 if (grid.hasCard(colorIndex, value)) {
                     cards.add(grid.getCard(colorIndex, value));
                 }
-                if (cards.size() >= 5) {
+                if (cards.size() >= MAXCARDS) {
                     return new HandRank(6, cards);
                 }
             }
@@ -236,17 +240,17 @@ public class HandRank {
         int found = 0;
         for (int value = 14; value > 1; value--) {
             CardCollection row = grid.getCardsOfValue(value);
-            if (row.size() == 3) {
+            if (row.size() == 3 && found == 0) {
                 for (Card card : row) {
                     cards.pushFirstWithMaxSize(card, 5);
                 }
                 found++;
-            } else if (row.size() == 2) {
+            } else if (row.size() >= 2) {
                 for (Card card : row) {
                     cards.addWithMaxSize(card, 5);
                 }
             }
-            if (cards.size() >= 5 && found == 1) {
+            if (cards.size() >= MAXCARDS && found == 1) {
                 return new HandRank(7, cards);
             }
         }
@@ -271,7 +275,7 @@ public class HandRank {
 
                 }
             }
-            if (cards.size() >= 5 && found == 1) {
+            if (cards.size() >= MAXCARDS && found == 1) {
                 return new HandRank(8, cards);
             }
         }
@@ -287,7 +291,7 @@ public class HandRank {
                 } else {
                     cards.clear();
                 }
-                if (cards.size() >= 5) {
+                if (cards.size() >= MAXCARDS) {
                     return new HandRank(9, cards);
                 }
             }

@@ -2,9 +2,10 @@ package poker;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class CardCollection implements Iterable<Card>, Cloneable {
-    protected ArrayList<Card> cards;
+    protected List<Card> cards;
 
     public CardCollection() {
         this.cards = new ArrayList<Card>();

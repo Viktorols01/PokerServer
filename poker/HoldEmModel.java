@@ -11,6 +11,9 @@ public class HoldEmModel {
     private int smallBlind;
     private int minBet;
 
+    private int pot;
+    private int remainingBet;
+
     public HoldEmModel(String[] arguments) {
         this.players = new ArrayList<PlayerData>();
         int j = 0;
@@ -53,37 +56,45 @@ public class HoldEmModel {
 
         this.smallBlind = Integer.valueOf(arguments[j++]);
         this.minBet = Integer.valueOf(arguments[j++]);
+
+        calculate();
+    }
+
+    private void calculate() {
+        this.pot = 0;
+        for (PlayerData player : players) {
+            this.pot += player.getBettedMarkers();
+        }
+
+        this.remainingBet = this.minBet - this.you.getBettedMarkers();
     }
 
     public ArrayList<PlayerData> getPlayers() {
-        return players;
+        return this.players;
     }
 
     public PlayerData getToPlay() {
-        return toPlay;
+        return this.toPlay;
     }
 
     public PlayerData getYou() {
-        return you;
+        return this.you;
     }
 
     public CardCollection getCommunityCards() {
-        return communityCards;
+        return this.communityCards;
     }
 
     public int getPot() {
-        int pot = 0;
-        for (PlayerData player : players) {
-            pot += player.getBettedMarkers();
-        }
-        return pot;
+        return this.pot;
+    }
+
+    public int getRemainingBet() {
+        return this.remainingBet;
     }
 
     public int getSmallBlind() {
-        return smallBlind;
+        return this.smallBlind;
     }
 
-    public int getMinBet() {
-        return minBet;
-    }
 }
