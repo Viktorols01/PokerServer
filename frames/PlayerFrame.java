@@ -30,9 +30,9 @@ public class PlayerFrame extends PokerFrame {
         Container container = new Container();
         container.setLayout(new FlowLayout());
         container.setPreferredSize(new Dimension(getJFrame().getWidth(), 40));
-        this.checkButton = new JButton("check");
+        this.checkButton = new JButton("match");
         this.checkButton.addActionListener((e) -> {
-            this.move = new String[] { "check", "0" };
+            this.move = new String[] { "match", "0" };
             this.hasMove = true;
         });
         container.add(checkButton);
@@ -57,7 +57,7 @@ public class PlayerFrame extends PokerFrame {
 
     @Override
     protected void onUpdateModel() {
-        this.checkButton.setText("check (" + (getModel().getMinBet() - getModel().getYou().getBettedMarkers()) + ")");
+        this.checkButton.setText("match (" + (getModel().getMinBet() - getModel().getYou().getBettedMarkers()) + ")");
         this.updateRenderables();
     }
 

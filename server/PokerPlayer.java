@@ -2,14 +2,17 @@ package server;
 
 import comms.Connection;
 import poker.PlayerData;
+import poker.PlayerStatistics;
 
 public class PokerPlayer {
     private Connection connection;
     private PlayerData data;    
+    private PlayerStatistics statistics;
 
     public PokerPlayer(Connection connection, int markers) {
         this.connection = connection;
         this.data = new PlayerData(connection.getName(), markers);
+        this.statistics = new PlayerStatistics();
     }
 
     public String getName() {
@@ -18,6 +21,10 @@ public class PokerPlayer {
 
     public PlayerData getPlayerData() {
         return this.data;
+    }
+
+    public PlayerStatistics getPlayerStatistics() {
+        return this.statistics;
     }
 
     public String getIP() {

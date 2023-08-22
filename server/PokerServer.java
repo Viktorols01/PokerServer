@@ -15,7 +15,6 @@ public class PokerServer extends Server {
     private Thread gameThread;
     private Broadcaster joinedSender;
 
-
     public PokerServer(int port) {
         super(port);
         this.game = new HoldEm(this);

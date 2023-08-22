@@ -5,17 +5,21 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
 import comms.Broadcaster;
 import comms.Connection;
+import server.PokerPlayer;
 import server.PokerServer;
 
 public class ServerFrame extends PokerFrame {
 
     private PokerServer server;
+
+    private List<PokerPlayer> players;
 
     private JButton openButton;
     private JButton closeButton;
@@ -39,8 +43,8 @@ public class ServerFrame extends PokerFrame {
                 try {
                     Broadcaster updateSender = server.getGame().getUpdateSender();
                     updateSender.receive();
-                    updateModel(server.getGame().getHoldEmModel());
-                    updateMessage(server.getGame().getMessage());
+                    this.players = server.getGame().getPlayers();
+                    updateRenderables();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -95,36 +99,30 @@ public class ServerFrame extends PokerFrame {
     @Override
     public void updateRenderables() {
         getGUI().clearRenderables();
-        if (getModel() != null) {
-            {
-                addRenderable(0, (g, q) -> {
-                    g.setColor(new Color(0, 100, 0));
-                    g.fillRect(0, 0, getGUI().getWidth(), getGUI().getHeight());
-                });
-                {
-
-                    final int cardwidth = 80;
-                    final int cardheight = 130;
-                    final int cardmargin = 10;
-                    final int x = getGUI().getWidth() / 2 - 2 * cardwidth;
-                    final int y = getGUI().getHeight() / 2;
-                    addCommunityCards(x, y, cardwidth, cardheight, cardmargin);
-                }
-
-                {
-                    final int cardwidth = 50;
-                    final int cardheight = 80;
-                    final int cardmargin = 7;
-                    addPlayerFrames(cardmargin, cardmargin, cardwidth, cardheight, cardmargin);
-                }
-
-                {
-                    final int height = 100;
-                    final int width = 200;
-                    final int margin = 20;
-                    addPot(getGUI().getWidth() / 2, margin, width, height, margin);
-                    addMessage(margin, getGUI().getHeight() - height - margin, width * 4, height, margin);
-                }
+        if (this.players != null) {
+            addRenderable(0, (g, q) -> {
+                g.setColor(new Color(0, 100, 0));
+                g.fillRect(0, 0, getGUI().getWidth(), getGUI().getHeight());
+            });
+            final int height = 30;
+            final int width = 160;
+            final int margin = 10;
+            for (int i = 0; i < players.size(); i++) {
+                PokerPlayer player = players.get(i);
+                addStringBox(player.getName(), margin, margin + i * (height + margin), width, height, margin);
+                addStringBox("Markers: " + player.getPlayerData().getMarkers(), margin + 1 * (width + margin),
+                        margin + i * (height + margin), width, height, margin);
+                addStringBox("Checks: " + player.getPlayerStatistics().getChecks(), margin + 2 * (width + margin),
+                        margin + i * (height + margin), width, height, margin);
+                addStringBox("Matches: " + player.getPlayerStatistics().getMatches(), margin + 3 * (width + margin),
+                        margin + i * (height + margin), width, height, margin);
+                addStringBox("Raises: " + player.getPlayerStatistics().getRaises(), margin + 4 * (width + margin),
+                        margin + i * (height + margin), width, height, margin);
+                addStringBox("Average raises: " + player.getPlayerStatistics().getAverageRaise(),
+                        margin + 5 * (width + margin),
+                        margin + i * (height + margin), width, height, margin);
+                addStringBox("Folds: " + player.getPlayerStatistics().getFolds(), margin + 6 * (width + margin),
+                        margin + i * (height + margin), width, height, margin);
             }
         } else {
             final int height = 50;

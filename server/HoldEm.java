@@ -46,10 +46,34 @@ public class HoldEm {
     public void play() {
         while (true) {
             playRound();
-            if (getPlayerCount() <= 1) {
+            if (this.players.size() <= 1) {
                 break;
             }
         }
+    }
+
+    public HoldEmModel getHoldEmModel() {
+        return new HoldEmModel(toPokerState(null, true));
+    }
+
+    public String getMessage() {
+        return this.message;
+    }
+
+    public void addPlayer(Connection connection) {
+        this.players.add(new PokerPlayer(connection, 1000));
+    }
+
+    public int getPlayerCount() {
+        return this.players.size();
+    }
+
+    public Broadcaster getUpdateSender() {
+        return this.updateSender;
+    }
+
+    public List<PokerPlayer> getPlayers() {
+        return this.players;
     }
 
     private void playRound() {
@@ -175,15 +199,18 @@ public class HoldEm {
                 switch (move) {
                     case "match":
                         player.getPlayerData().bet(remaining);
+                        player.getPlayerStatistics().addMatch();
                         Protocol.sendPackage(Protocol.Command.ACCEPTED_MOVE, new String[] {}, player.getConnection());
                         break;
                     case "check": {
                         if (remaining == 0) {
+                            player.getPlayerStatistics().addCheck();
                             Protocol.sendPackage(Protocol.Command.ACCEPTED_MOVE, new String[] {},
                                     player.getConnection());
                         } else {
                             player.getPlayerData().setFolded(true);
                             choices--;
+                            player.getPlayerStatistics().addFold();
                             Protocol.sendPackage(Protocol.Command.ACCEPTED_MOVE, new String[] {},
                                     player.getConnection());
                         }
@@ -194,6 +221,9 @@ public class HoldEm {
                         if (n > remaining) {
                             this.minBet += n - remaining;
                             betsRemaining = (playerCount - 1);
+                            player.getPlayerStatistics().addRaise(n - remaining);
+                        } else {
+                            player.getPlayerStatistics().addMatch();
                         }
                         Protocol.sendPackage(Protocol.Command.ACCEPTED_MOVE, new String[] {}, player.getConnection());
                         break;
@@ -201,12 +231,14 @@ public class HoldEm {
                     case "fold": {
                         player.getPlayerData().setFolded(true);
                         choices--;
+                        player.getPlayerStatistics().addFold();
                         Protocol.sendPackage(Protocol.Command.ACCEPTED_MOVE, new String[] {}, player.getConnection());
                         break;
                     }
                     default:
                         player.getPlayerData().setFolded(true);
                         choices--;
+                        player.getPlayerStatistics().addFold();
                         Protocol.sendPackage(Protocol.Command.DENIED_MOVE, new String[] { "Unknown move: " + move },
                                 player.getConnection());
                         break;
@@ -296,14 +328,6 @@ public class HoldEm {
         }
     }
 
-    public HoldEmModel getHoldEmModel() {
-        return new HoldEmModel(toPokerState(null, true));
-    }
-
-    public String getMessage() {
-        return this.message;
-    }
-
     private String[] toPokerState(Connection connection, boolean show) {
         boolean showAll;
         if (show) {
@@ -390,17 +414,5 @@ public class HoldEm {
                 i--;
             }
         }
-    }
-
-    public void addPlayer(Connection connection) {
-        this.players.add(new PokerPlayer(connection, 1000));
-    }
-
-    public int getPlayerCount() {
-        return this.players.size();
-    }
-
-    public Broadcaster getUpdateSender() {
-        return this.updateSender;
     }
 }

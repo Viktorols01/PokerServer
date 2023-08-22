@@ -78,6 +78,39 @@ public abstract class PokerFrame extends RenderableFrame {
         public abstract float f(float q);
     }
 
+    protected final void addGeneralBoardview() {
+        {
+            addRenderable(0, (g, q) -> {
+                g.setColor(new Color(0, 100, 0));
+                g.fillRect(0, 0, getGUI().getWidth(), getGUI().getHeight());
+            });
+            {
+
+                final int cardwidth = 80;
+                final int cardheight = 130;
+                final int cardmargin = 10;
+                final int x = getGUI().getWidth() / 2 - 2 * cardwidth;
+                final int y = getGUI().getHeight() / 2;
+                addCommunityCards(x, y, cardwidth, cardheight, cardmargin);
+            }
+
+            {
+                final int cardwidth = 50;
+                final int cardheight = 80;
+                final int cardmargin = 7;
+                addPlayerFrames(cardmargin, cardmargin, cardwidth, cardheight, cardmargin);
+            }
+
+            {
+                final int height = 100;
+                final int width = 200;
+                final int margin = 20;
+                addPot(getGUI().getWidth() / 2, margin, width, height, margin);
+                addMessage(margin, getGUI().getHeight() - height - margin, width * 4, height, margin);
+            }
+        }
+    }
+
     protected final void addCommunityCards(int x, int y, int cardwidth, int cardheight, int cardmargin) {
         for (int i = 0; i < 5; i++) {
             final int fi = i;
