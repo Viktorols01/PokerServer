@@ -57,7 +57,7 @@ public class PlayerFrame extends PokerFrame {
 
     @Override
     protected void onUpdateModel() {
-        this.checkButton.setText("match (" + (getModel().getMinBet() - getModel().getYou().getBettedMarkers()) + ")");
+        this.checkButton.setText("match (" + (getModel().getRemainingBet()) + ")");
         this.updateRenderables();
     }
 

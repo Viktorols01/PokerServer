@@ -5,14 +5,15 @@ import java.util.ArrayList;
 public class HoldEmModel {
     private ArrayList<PlayerData> players;
     private PlayerData toPlay;
-    private PlayerData you;
     private CardCollection communityCards;
 
-    private int smallBlind;
-    private int minBet;
-
     private int pot;
+    private int smallBlind;
+
+    private PlayerData you;
     private int remainingBet;
+
+    private int minBet;
 
     public HoldEmModel(String[] arguments) {
         this.players = new ArrayList<PlayerData>();
@@ -66,7 +67,9 @@ public class HoldEmModel {
             this.pot += player.getBettedMarkers();
         }
 
-        this.remainingBet = this.minBet - this.you.getBettedMarkers();
+        if (this.you != null) {
+            this.remainingBet = this.minBet - this.you.getBettedMarkers();
+        }
     }
 
     public ArrayList<PlayerData> getPlayers() {

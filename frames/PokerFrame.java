@@ -168,7 +168,7 @@ public abstract class PokerFrame extends RenderableFrame {
     }
 
     protected final void addRemainingBets(int x, int y, int width, int height, int margin) {
-        addStringBox("Markers to join: " + (getModel().getMinBet() - getModel().getYou().getBettedMarkers()) + ".", x,
+        addStringBox("Markers to join: " + (getModel().getRemainingBet()) + ".", x,
                 y, width, height, margin);
     }
 
