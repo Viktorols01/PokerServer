@@ -386,7 +386,7 @@ public class HandRank {
         if (cards != null) {
             if (cards.size() > 0) {
                 str.append(" ");
-                str.append(cards.get(0).getValue());
+                str.append(cards.get(0).getValueString());
             }
         }
         return str.toString();

@@ -85,6 +85,7 @@ public class HoldEm {
         turn();
         getBets();
         river();
+        getBets();
         determineWinner();
     }
 

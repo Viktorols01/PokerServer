@@ -40,6 +40,21 @@ public class Card {
         return str.toString();
     }
 
+    public String getValueString() {
+        switch (this.value) {
+            case 1:
+                return "E";
+            case 11:
+                return "J";
+            case 12:
+                return "Q";
+            case 13:
+                return "K";
+            default:
+                return String.valueOf(this.value);
+        }
+    }
+
     public enum Color {
         HEARTS,
         DIAMONDS,

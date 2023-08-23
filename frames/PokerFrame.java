@@ -266,7 +266,6 @@ public abstract class PokerFrame extends RenderableFrame {
             renderImage(g, image, x + margin, y + margin, width - margin * 2, height - margin * 2, alpha);
         } else {
             Card.Color color = card.getColor();
-            int value = card.getValue();
             switch (color) {
                 case DIAMONDS:
                     image = diamonds;
@@ -284,27 +283,9 @@ public abstract class PokerFrame extends RenderableFrame {
                     image = null;
                     break;
             }
-            String str;
-            switch (value) {
-                case 1:
-                    str = "E";
-                    break;
-                case 11:
-                    str = "J";
-                    break;
-                case 12:
-                    str = "Q";
-                    break;
-                case 13:
-                    str = "K";
-                    break;
-                default:
-                    str = String.valueOf(card.getValue());
-                    break;
-            }
             renderImage(g, image, x + margin, y + margin, width - margin * 2, height - margin * 2, alpha);
 
-            renderString(g, str, x, y, height / 4, new Color(0, 0, 0, alpha));
+            renderString(g, card.getValueString(), x, y, height / 4, new Color(0, 0, 0, alpha));
         }
     }
 
