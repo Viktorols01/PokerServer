@@ -35,11 +35,6 @@ public class YouClient extends PokerClient {
 
     @Override
     protected String[] getContinue() {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         return new String[] {};
     }
 

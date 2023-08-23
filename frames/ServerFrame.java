@@ -31,7 +31,7 @@ public class ServerFrame extends PokerFrame {
     public ServerFrame(PokerServer server, int width, int height) {
         super(width, height);
         this.server = server;
-        getJFrame().setTitle("ServerFrame");
+        getJFrame().setTitle("ServerFrame | closed");
         addListeners();
 
         updateRenderables();
@@ -75,21 +75,20 @@ public class ServerFrame extends PokerFrame {
         openButton.addActionListener((e) -> {
             server.openConnections();
             updateRenderables();
+            getJFrame().setTitle("ServerFrame | open");
         });
         container.add(openButton);
         closeButton = new JButton("close");
         closeButton.addActionListener((e) -> {
             server.closeConnections();
             updateRenderables();
+            getJFrame().setTitle("ServerFrame | closed");
         });
         container.add(closeButton);
-        startButton = new JButton("start");
+        startButton = new JButton("restart");
         startButton.addActionListener((e) -> {
-            server.closeConnections();
             server.startGame();
-            openButton.setVisible(false);
-            closeButton.setVisible(false);
-            startButton.setVisible(false);
+            updateRenderables();
         });
         container.add(startButton);
         jframe.add(getGUI(), BorderLayout.CENTER);

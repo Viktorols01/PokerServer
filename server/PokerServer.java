@@ -23,6 +23,10 @@ public class PokerServer extends Server {
 
     public void startGame() {
         this.game.setup();
+
+        if (gameThread != null) {
+            this.gameThread.interrupt();
+        }
         this.gameThread = new Thread(() -> {
             game.play();
         }, "gameThread");
@@ -78,7 +82,6 @@ public class PokerServer extends Server {
                         Connection.Type type = Connection.Type.valueOf(arguments[0].toUpperCase());
                         switch (type) {
                             case PLAYER:
-                                game.addPlayer(connection);
                                 setType(connection, type);
                                 break;
                             case SPECTATOR:

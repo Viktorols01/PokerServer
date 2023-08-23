@@ -40,6 +40,7 @@ public class HoldEm {
     }
 
     public void setup() {
+        this.addPlayers();
         this.setupBlinds();
     }
 
@@ -60,10 +61,6 @@ public class HoldEm {
         return this.message;
     }
 
-    public void addPlayer(Connection connection) {
-        this.players.add(new PokerPlayer(connection, 1000));
-    }
-
     public int getPlayerCount() {
         return this.players.size();
     }
@@ -74,6 +71,23 @@ public class HoldEm {
 
     public List<PokerPlayer> getPlayers() {
         return this.players;
+    }
+
+    private void addPlayers() {
+        clearPlayers();
+        for (Connection connection : server.getConnections()) {
+            if (connection.getType() == Connection.Type.PLAYER) {
+                addPlayer(connection);
+            }
+        }
+    }
+
+    private void clearPlayers() {
+        this.players.clear();
+    }
+
+    private void addPlayer(Connection connection) {
+        this.players.add(new PokerPlayer(connection, 1000));
     }
 
     private void playRound() {
