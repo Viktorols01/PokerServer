@@ -331,10 +331,10 @@ public class HoldEm {
             winnerNames.append(" ");
         }
         sendGameInfo(winnerNames + "won!", true);
+        requestContinueFromPlayers();
         if (done) {
             for (int i = players.size() - 1; i >= 0; i--) {
                 PokerPlayer player = players.get(i);
-                requestContinueFromPlayers();
                 if (player.getPlayerData().getMarkers() == 0) {
                     players.remove(player);
                 }
@@ -409,8 +409,10 @@ public class HoldEm {
     private void requestContinueFromPlayers() {
         for (int i = 0; i < server.getConnections().size(); i++) {
             Connection connection = server.getConnections().get(i);
+            System.out.println("Waiting for " + connection.getName());
             if (connection.getType() == Connection.Type.PLAYER) {
                 if (!requestContinue(connection)) {
+                    System.out.println("AAAAA");
                     i--;
                 }
             }
