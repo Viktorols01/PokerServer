@@ -137,9 +137,6 @@ public class HandRank {
             if (cards.size() >= MAXCARDS && found == 1) {
                 return new HandRank(2, cards);
             }
-            if (found == 1) {
-                return new HandRank(2, cards);
-            }
         }
         return null;
     }

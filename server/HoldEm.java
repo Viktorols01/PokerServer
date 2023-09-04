@@ -216,6 +216,7 @@ public class HoldEm {
                 continue;
             }
 
+            requestContinueFromSpectators();
             sendGameInfo(player.getName() + " to play.", false);
 
             Protocol.Command command = requestMove(player);
@@ -355,6 +356,7 @@ public class HoldEm {
         }
         sendGameInfo(winnerNames + "won!", true);
         requestContinueFromPlayers();
+        requestContinueFromSpectators();
         if (done) {
             for (int i = players.size() - 1; i >= 0; i--) {
                 PokerPlayer player = players.get(i);
@@ -364,7 +366,7 @@ public class HoldEm {
                     losers.add(player);
                 }
             }
-            sendGameInfo("Losers removed", true);
+            sendGameInfo("Losers removed.", true);
         } else {
             determineWinners();
         }
@@ -450,8 +452,6 @@ public class HoldEm {
         }
         this.message = message;
         updateSender.broadcast();
-
-        requestContinueFromSpectators();
     }
 
     private void requestContinueFromPlayers() {
@@ -459,7 +459,6 @@ public class HoldEm {
             Connection connection = server.getConnections().get(i);
             if (connection.getType() == Connection.Type.PLAYER) {
                 if (!requestContinue(connection)) {
-                    System.out.println("Får emot något annat!");
                     i--;
                 }
             }
