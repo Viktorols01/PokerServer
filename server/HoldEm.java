@@ -196,8 +196,7 @@ public class HoldEm {
 
             sendGameInfo(player.getName() + " to play.", false);
 
-            Protocol.sendPackage(Protocol.Command.REQUEST_MOVE, new String[] {}, player.getConnection());
-            Protocol.Command command = Protocol.readCommand(player.getConnection());
+            Protocol.Command command = requestMove(player);
 
             if (command == Protocol.Command.SEND_MOVE) {
                 String[] arguments = Protocol.readArguments(command, player.getConnection());
@@ -335,6 +334,7 @@ public class HoldEm {
         if (done) {
             for (int i = players.size() - 1; i >= 0; i--) {
                 PokerPlayer player = players.get(i);
+                requestContinueFromPlayers();
                 if (player.getPlayerData().getMarkers() == 0) {
                     players.remove(player);
                 }
@@ -344,20 +344,7 @@ public class HoldEm {
         }
     }
 
-    private String[] toPokerState(Connection connection, boolean show) {
-        boolean showAll;
-        if (show) {
-            showAll = true;
-        } else if (connection != null) {
-            if (connection.getType() == Connection.Type.SPECTATOR) {
-                showAll = true;
-            } else {
-                showAll = false;
-            }
-        } else {
-            showAll = false;
-        }
-
+    private String[] toPokerState(Connection connection, boolean showNonFolders) {
         String playercount = String.valueOf(players.size());
         String cardcount = String.valueOf(communityCards.size());
 
@@ -375,7 +362,7 @@ public class HoldEm {
             String you = String.valueOf(isYou);
             String card1;
             String card2;
-            if (isYou || showAll) {
+            if (isYou || connection.getType() == Connection.Type.SPECTATOR || (showNonFolders && !player.getPlayerData().hasFolded())) {
                 card1 = player.getPlayerData().getHand().get(0).toCode();
                 card2 = player.getPlayerData().getHand().get(1).toCode();
             } else {
@@ -416,19 +403,41 @@ public class HoldEm {
         this.message = message;
         updateSender.broadcast();
 
-        requestContinue();
+        requestContinueFromSpectators();
     }
 
-    private void requestContinue() {
+    private void requestContinueFromPlayers() {
         for (int i = 0; i < server.getConnections().size(); i++) {
             Connection connection = server.getConnections().get(i);
-            Protocol.sendPackage(Protocol.Command.REQUEST_CONTINUE, new String[] {}, connection);
-            Protocol.Command command = Protocol.readCommand(connection);
-            if (command == Protocol.Command.SEND_CONTINUE) {
-                continue;
-            } else {
-                i--;
+            if (connection.getType() == Connection.Type.PLAYER) {
+                if (!requestContinue(connection)) {
+                    i--;
+                }
             }
         }
+    }
+
+    private void requestContinueFromSpectators() {
+        for (int i = 0; i < server.getConnections().size(); i++) {
+            Connection connection = server.getConnections().get(i);
+            if (connection.getType() == Connection.Type.SPECTATOR) {
+                if (!requestContinue(connection)) {
+                    i--;
+                }
+            }
+        }
+    }
+
+    private boolean requestContinue(Connection connection) {
+        Protocol.sendPackage(Protocol.Command.REQUEST_CONTINUE, new String[] {}, connection);
+        Protocol.Command command = Protocol.readCommand(connection);
+        return (command == Protocol.Command.SEND_CONTINUE);
+
+    }
+
+    private Protocol.Command requestMove(PokerPlayer player) {
+        Protocol.sendPackage(Protocol.Command.REQUEST_MOVE, new String[] {}, player.getConnection());
+        Protocol.Command command = Protocol.readCommand(player.getConnection());
+        return command;
     }
 }

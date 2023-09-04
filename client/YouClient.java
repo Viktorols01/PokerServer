@@ -35,6 +35,7 @@ public class YouClient extends PokerClient {
 
     @Override
     protected String[] getContinue() {
+        pokerframe.getMove();
         return new String[] {};
     }
 

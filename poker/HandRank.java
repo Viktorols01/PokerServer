@@ -124,7 +124,7 @@ public class HandRank {
             CardCollection row = grid.getCardsOfValue(value);
             if (row.size() == 2) {
                 for (Card card : row) {
-                    cards.pushFirstWithMaxSize(card, MAXCARDS);
+                    cards.addWithMaxSize(card, 0, MAXCARDS);
                 }
                 found++;
             } else {
@@ -132,18 +132,16 @@ public class HandRank {
                     if (grid.hasCard(colorIndex, value)) {
                         cards.addWithMaxSize(grid.getCard(colorIndex, value), MAXCARDS);
                     }
-
                 }
             }
             if (cards.size() >= MAXCARDS && found == 1) {
                 return new HandRank(2, cards);
             }
+            if (found == 1) {
+                return new HandRank(2, cards);
+            }
         }
-        if (found == 1) {
-            return new HandRank(2, cards);
-        } else {
-            return null;
-        }
+        return null;
     }
 
     private static HandRank getTwoPair(CardGrid grid) {
@@ -151,9 +149,9 @@ public class HandRank {
         int found = 0;
         for (int value = 14; value > 1; value--) {
             CardCollection row = grid.getCardsOfValue(value);
-            if (row.size() == 2) {
+            if (row.size() == 2 && found < 2) {
                 for (Card card : row) {
-                    cards.pushFirstWithMaxSize(card, MAXCARDS);
+                    cards.addWithMaxSize(card, found * 2, MAXCARDS);
                 }
                 found++;
             } else {
@@ -167,11 +165,7 @@ public class HandRank {
                 return new HandRank(3, cards);
             }
         }
-        if (found == 2) {
-            return new HandRank(3, cards);
-        } else {
-            return null;
-        }
+        return null;
     }
 
     private static HandRank getThreeOfAKind(CardGrid grid) {
@@ -181,7 +175,7 @@ public class HandRank {
             CardCollection row = grid.getCardsOfValue(value);
             if (row.size() == 3) {
                 for (Card card : row) {
-                    cards.pushFirstWithMaxSize(card, MAXCARDS);
+                    cards.addWithMaxSize(card, 0, MAXCARDS);
                 }
                 found++;
             } else {
@@ -194,12 +188,11 @@ public class HandRank {
             if (cards.size() >= MAXCARDS && found == 1) {
                 return new HandRank(4, cards);
             }
+            if (found == 1) {
+                return new HandRank(4, cards);
+            }
         }
-        if (found == 1) {
-            return new HandRank(4, cards);
-        } else {
-            return null;
-        }
+        return null;
     }
 
     private static HandRank getStraight(CardGrid grid) {
@@ -242,7 +235,7 @@ public class HandRank {
             CardCollection row = grid.getCardsOfValue(value);
             if (row.size() == 3 && found == 0) {
                 for (Card card : row) {
-                    cards.pushFirstWithMaxSize(card, 5);
+                    cards.addWithMaxSize(card, 0, MAXCARDS);
                 }
                 found++;
             } else if (row.size() >= 2) {
@@ -264,7 +257,7 @@ public class HandRank {
             CardCollection row = grid.getCardsOfValue(value);
             if (row.size() == 4) {
                 for (Card card : row) {
-                    cards.pushFirstWithMaxSize(card, 5);
+                    cards.addWithMaxSize(card, 0, MAXCARDS);
                 }
                 found++;
             } else {
