@@ -216,7 +216,6 @@ public class HoldEm {
                 continue;
             }
 
-            requestContinueFromSpectators();
             sendGameInfo(player.getName() + " to play.", false);
 
             Protocol.Command command = requestMove(player);
@@ -286,6 +285,7 @@ public class HoldEm {
                 Protocol.sendPackage(Protocol.Command.DENIED_MOVE, new String[] { "Unknown command" },
                         player.getConnection());
             }
+            requestContinueFromSpectators();
         }
     }
 
