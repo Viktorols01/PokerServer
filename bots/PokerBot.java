@@ -1,4 +1,4 @@
-package client;
+package bots;
 
 import poker.HoldEmModel;
 

@@ -2,6 +2,7 @@ package main;
 
 import javax.swing.JOptionPane;
 
+import bots.MyBot;
 import client.BotClient;
 import client.PokerClient;
 import client.SpectatorClient;

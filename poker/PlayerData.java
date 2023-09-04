@@ -23,6 +23,15 @@ public class PlayerData {
         this.blind = blind;
     }
 
+    public void reset(int markers) {
+        this.hand = new CardCollection();
+        this.markers = markers;
+        this.markers = markers;
+        this.bettedMarkers = 0;
+        this.folded = false;
+        this.blind = "none";
+    }
+
     public String getName() {
         return name;
     }

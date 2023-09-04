@@ -22,7 +22,19 @@ public class PokerServer extends Server {
     }
 
     public void startGame() {
-        this.game.setup();
+        this.game.addPlayers();
+
+        if (gameThread != null) {
+            this.gameThread.interrupt();
+        }
+        this.gameThread = new Thread(() -> {
+            game.play();
+        }, "gameThread");
+        this.gameThread.start();
+    }
+
+    public void restartGame() {
+        this.game.resetPlayers();
 
         if (gameThread != null) {
             this.gameThread.interrupt();

@@ -7,6 +7,10 @@ public class PlayerStatistics {
     private int foldCount;
     private int matchCount;
     private int checkCount;
+    private int theoreticalHandWinCount;
+    private int handWinCount;
+    private int handLoseCount;
+    private int gameWinCount;
     private List<Integer> raiseList;
 
     public PlayerStatistics() {
@@ -17,24 +21,56 @@ public class PlayerStatistics {
         this.foldCount++;
     }
 
-    public int getFolds() {
-        return this.foldCount;
-    }
-
     public void addMatch() {
         this.matchCount++;
-    }
-
-    public int getMatches() {
-        return this.matchCount;
     }
 
     public void addCheck() {
         this.checkCount++;
     }
 
+    public void addTheoreticalHandWin() {
+        this.theoreticalHandWinCount++;
+    }
+
+    public void addHandWin() {
+        this.handWinCount++;
+    }
+
+    public void addHandLoss() {
+        this.handLoseCount++;
+    }
+
+    public void addGameWin() {
+        this.gameWinCount++;
+    }
+
+    public int getFolds() {
+        return this.foldCount;
+    }
+
+    public int getMatches() {
+        return this.matchCount;
+    }
+
     public int getChecks() {
         return this.checkCount;
+    }
+
+    public int getTheoreticalHandWins() {
+        return this.theoreticalHandWinCount;
+    }
+
+    public int getHandWins() {
+        return this.handWinCount;
+    }
+
+    public int getHandLosses() {
+        return this.handLoseCount;
+    }
+
+    public int getGameWins() {
+        return this.gameWinCount;
     }
 
     public void addRaise(int n) {

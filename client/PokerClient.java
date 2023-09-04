@@ -69,7 +69,7 @@ public abstract class PokerClient {
                     case DENIED_MOVE: {
                         String[] arguments = Protocol.readArguments(Protocol.Command.DENIED_MOVE, connection);
                         JOptionPane.showMessageDialog(null,
-                                "Your clients move has been denied! Reason:" + arguments[0]);
+                                "Your clients move has been denied! Reason: " + arguments[0]);
                         break;
                     }
                     case REQUEST_CONTINUE: {

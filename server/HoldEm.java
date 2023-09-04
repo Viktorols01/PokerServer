@@ -19,6 +19,7 @@ public class HoldEm {
     private Broadcaster updateSender;
 
     private List<PokerPlayer> players;
+    private List<PokerPlayer> losers;
     private PokerPlayer toPlay;
 
     private Deck deck;
@@ -32,25 +33,31 @@ public class HoldEm {
 
     private String message;
 
+    private boolean finished;
+
+    private static final int STARTING_MARKERS = 2000;
+
     public HoldEm(PokerServer server) {
         this.server = server;
         this.updateSender = new Broadcaster();
         this.players = Collections.synchronizedList(new ArrayList<PokerPlayer>());
+        this.losers = Collections.synchronizedList(new ArrayList<PokerPlayer>());
         this.smallBlindIndex = 0;
-    }
 
-    public void setup() {
-        this.addPlayers();
-        this.setupBlinds();
+        this.finished = false;
     }
 
     public void play() {
+        this.setupBlinds();
+        this.finished = false;
         while (true) {
             playRound();
             if (this.players.size() <= 1) {
                 break;
             }
         }
+        this.finished = true;
+        this.players.get(0).getPlayerStatistics().addGameWin();
     }
 
     public HoldEmModel getHoldEmModel() {
@@ -70,10 +77,13 @@ public class HoldEm {
     }
 
     public List<PokerPlayer> getPlayers() {
-        return this.players;
+        ArrayList<PokerPlayer> all = new ArrayList<PokerPlayer>();
+        all.addAll(players);
+        all.addAll(losers);
+        return all;
     }
 
-    private void addPlayers() {
+    public void addPlayers() {
         clearPlayers();
         for (Connection connection : server.getConnections()) {
             if (connection.getType() == Connection.Type.PLAYER) {
@@ -82,12 +92,23 @@ public class HoldEm {
         }
     }
 
-    private void clearPlayers() {
+    public void resetPlayers() {
+        for (PokerPlayer loser : losers) {
+            this.players.add(loser);
+        }
+        losers.clear();
+        for (PokerPlayer player : players) {
+            player.getPlayerData().reset(STARTING_MARKERS);
+        }
+    }
+
+    public void clearPlayers() {
         this.players.clear();
+        this.losers.clear();
     }
 
     private void addPlayer(Connection connection) {
-        this.players.add(new PokerPlayer(connection, 1000));
+        this.players.add(new PokerPlayer(connection, STARTING_MARKERS));
     }
 
     private void playRound() {
@@ -100,7 +121,8 @@ public class HoldEm {
         getBets();
         river();
         getBets();
-        determineWinner();
+        determineTheoreticalWinners();
+        determineWinners();
     }
 
     private void start() {
@@ -112,7 +134,7 @@ public class HoldEm {
         this.smallBlind = 50;
         this.minBet = smallBlind * 2;
 
-        resetPlayers();
+        readyPlayers();
         deal();
         setupBlinds();
     }
@@ -142,7 +164,7 @@ public class HoldEm {
         }
     }
 
-    private void resetPlayers() {
+    private void readyPlayers() {
         for (PokerPlayer player : players) {
             player.getPlayerData().getHand().clear();
             player.getPlayerData().setFolded(false);
@@ -283,7 +305,7 @@ public class HoldEm {
         this.communityCards.add(deck.draw());
     }
 
-    private void determineWinner() {
+    private void determineWinners() {
         ArrayList<PokerPlayer> winners = new ArrayList<PokerPlayer>();
         HandRank maxRank = new HandRank();
         for (PokerPlayer player : players) {
@@ -314,6 +336,7 @@ public class HoldEm {
         }
 
         for (PokerPlayer winner : winners) {
+            winner.getPlayerStatistics().addHandWin();
             winner.getPlayerData().giveMarkers(pot / winners.size());
         }
 
@@ -335,12 +358,36 @@ public class HoldEm {
         if (done) {
             for (int i = players.size() - 1; i >= 0; i--) {
                 PokerPlayer player = players.get(i);
+                player.getPlayerStatistics().addHandLoss();
                 if (player.getPlayerData().getMarkers() == 0) {
-                    players.remove(player);
+                    players.remove(i);
+                    losers.add(player);
                 }
             }
+            sendGameInfo("Losers removed", true);
         } else {
-            determineWinner();
+            determineWinners();
+        }
+    }
+
+    private void determineTheoreticalWinners() {
+        ArrayList<PokerPlayer> winners = new ArrayList<PokerPlayer>();
+        HandRank maxRank = new HandRank();
+        for (PokerPlayer player : players) {
+            CardCollection hand = CardCollection.join(communityCards, player.getPlayerData().getHand());
+            HandRank rank = HandRank.rank(hand);
+            int comparison = rank.compare(maxRank);
+            if (comparison == 1) {
+                winners.clear();
+                winners.add(player);
+                maxRank = rank;
+            } else if (comparison == 0) {
+                winners.add(player);
+            }
+        }
+
+        for (PokerPlayer winner : winners) {
+            winner.getPlayerStatistics().addTheoreticalHandWin();
         }
     }
 
@@ -362,7 +409,8 @@ public class HoldEm {
             String you = String.valueOf(isYou);
             String card1;
             String card2;
-            if (isYou || connection.getType() == Connection.Type.SPECTATOR || (showNonFolders && !player.getPlayerData().hasFolded())) {
+            if (isYou || connection.getType() == Connection.Type.SPECTATOR
+                    || (showNonFolders && !player.getPlayerData().hasFolded())) {
                 card1 = player.getPlayerData().getHand().get(0).toCode();
                 card2 = player.getPlayerData().getHand().get(1).toCode();
             } else {
@@ -409,10 +457,9 @@ public class HoldEm {
     private void requestContinueFromPlayers() {
         for (int i = 0; i < server.getConnections().size(); i++) {
             Connection connection = server.getConnections().get(i);
-            System.out.println("Waiting for " + connection.getName());
             if (connection.getType() == Connection.Type.PLAYER) {
                 if (!requestContinue(connection)) {
-                    System.out.println("AAAAA");
+                    System.out.println("Får emot något annat!");
                     i--;
                 }
             }
@@ -433,7 +480,8 @@ public class HoldEm {
     private boolean requestContinue(Connection connection) {
         Protocol.sendPackage(Protocol.Command.REQUEST_CONTINUE, new String[] {}, connection);
         Protocol.Command command = Protocol.readCommand(connection);
-        return (command == Protocol.Command.SEND_CONTINUE);
+        boolean doContinue = (command == Protocol.Command.SEND_CONTINUE);
+        return doContinue;
 
     }
 
@@ -441,5 +489,9 @@ public class HoldEm {
         Protocol.sendPackage(Protocol.Command.REQUEST_MOVE, new String[] {}, player.getConnection());
         Protocol.Command command = Protocol.readCommand(player.getConnection());
         return command;
+    }
+
+    public boolean isFinished() {
+        return this.finished;
     }
 }

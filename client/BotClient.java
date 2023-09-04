@@ -1,5 +1,6 @@
 package client;
 
+import bots.PokerBot;
 import poker.HoldEmModel;
 
 public class BotClient extends PokerClient {

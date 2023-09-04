@@ -85,9 +85,15 @@ public class ServerFrame extends PokerFrame {
             getJFrame().setTitle("ServerFrame | closed");
         });
         container.add(closeButton);
-        startButton = new JButton("restart");
+        startButton = new JButton("start");
         startButton.addActionListener((e) -> {
             server.startGame();
+            updateRenderables();
+        });
+        container.add(startButton);
+        startButton = new JButton("restart");
+        startButton.addActionListener((e) -> {
+            server.restartGame();
             updateRenderables();
         });
         container.add(startButton);
@@ -109,16 +115,15 @@ public class ServerFrame extends PokerFrame {
             for (int i = 0; i < players.size(); i++) {
                 PokerPlayer player = players.get(i);
                 addStringBox(player.getName(), margin, margin + i * (height + margin), width, height, margin);
-                addStringBox("Markers: " + player.getPlayerData().getMarkers(), margin + 1 * (width + margin),
+                addStringBox("Game wins: " + player.getPlayerStatistics().getGameWins(), margin + 1 * (width + margin),
                         margin + i * (height + margin), width, height, margin);
-                addStringBox("Checks: " + player.getPlayerStatistics().getChecks(), margin + 2 * (width + margin),
+                addStringBox("Theoretical wins: " + player.getPlayerStatistics().getTheoreticalHandWins(), margin + 2 * (width + margin),
                         margin + i * (height + margin), width, height, margin);
-                addStringBox("Matches: " + player.getPlayerStatistics().getMatches(), margin + 3 * (width + margin),
+                addStringBox("Wins: " + player.getPlayerStatistics().getHandWins(), margin + 3 * (width + margin),
                         margin + i * (height + margin), width, height, margin);
-                addStringBox("Raises: " + player.getPlayerStatistics().getRaises(), margin + 4 * (width + margin),
+                addStringBox("Losses: " + player.getPlayerStatistics().getHandLosses(), margin + 4 * (width + margin),
                         margin + i * (height + margin), width, height, margin);
-                addStringBox("Average raises: " + player.getPlayerStatistics().getAverageRaise(),
-                        margin + 5 * (width + margin),
+                addStringBox("Raises: " + player.getPlayerStatistics().getRaises(), margin + 5 * (width + margin),
                         margin + i * (height + margin), width, height, margin);
                 addStringBox("Folds: " + player.getPlayerStatistics().getFolds(), margin + 6 * (width + margin),
                         margin + i * (height + margin), width, height, margin);

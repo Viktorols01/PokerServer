@@ -90,8 +90,6 @@ public class SpectatorFrame extends PokerFrame {
 
     }
 
-
-
     public String[] getContinue() {
         updateRenderables();
         while (!this.canContinue) {
