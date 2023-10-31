@@ -34,6 +34,9 @@ public class PokerServer extends Server {
     }
 
     public void restartGame() {
+        if (!this.game.isFinished()) {
+            return;
+        }
         this.game.resetPlayers();
 
         if (gameThread != null) {

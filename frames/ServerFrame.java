@@ -34,6 +34,7 @@ public class ServerFrame extends PokerFrame {
         getJFrame().setTitle("ServerFrame | closed");
         addListeners();
 
+        server.openConnections();
         updateRenderables();
     }
 
@@ -132,12 +133,16 @@ public class ServerFrame extends PokerFrame {
             final int height = 50;
             final int width = 500;
             final int margin = 10;
-            addStringBox("Server is " + (server.isOpen() ? "open" : "closed") + ".", margin, margin, width * 2,
+            addStringBox("Server is " + (server.isOpen() ? "open" : "closed") + ".", margin, margin + (0) * (height + margin), width * 2,
                     height * 2, margin * 2);
+            addStringBox("IP: " + server.getIP() + ".", margin, margin + (2) * (height + margin), width * 2,
+                    height, margin);
+            addStringBox("Port: " + server.getPort() + ".", margin, margin + (3) * (height + margin), width * 2,
+                    height, margin);
             for (int i = 0; i < server.getConnections().size(); i++) {
                 Connection connection = server.getConnections().get(i);
                 addStringBox(connection.getName() + " (" + connection.getIP() + ")", margin,
-                        (height + margin) * 2 + margin + i * (height + margin), width, height,
+                        margin + (4 + i) * (height + margin), width, height,
                         margin);
             }
         }
