@@ -34,7 +34,6 @@ public class ServerFrame extends PokerFrame {
         getJFrame().setTitle("ServerFrame | closed");
         addListeners();
 
-        server.openConnections();
         updateRenderables();
     }
 
@@ -92,7 +91,7 @@ public class ServerFrame extends PokerFrame {
             updateRenderables();
         });
         container.add(startButton);
-        startButton = new JButton("restart");
+        startButton = new JButton("restart game");
         startButton.addActionListener((e) -> {
             server.restartGame();
             updateRenderables();
@@ -135,14 +134,16 @@ public class ServerFrame extends PokerFrame {
             final int margin = 10;
             addStringBox("Server is " + (server.isOpen() ? "open" : "closed") + ".", margin, margin + (0) * (height + margin), width * 2,
                     height * 2, margin * 2);
-            addStringBox("IP: " + server.getIP() + ".", margin, margin + (2) * (height + margin), width * 2,
+            addStringBox("IP: " + server.getIP(), margin, margin + (2) * (height + margin), width * 2,
                     height, margin);
-            addStringBox("Port: " + server.getPort() + ".", margin, margin + (3) * (height + margin), width * 2,
+            addStringBox("Port: " + server.getPort(), margin, margin + (3) * (height + margin), width * 2,
+                    height, margin);
+            addStringBox("Players: ", margin, margin + (4) * (height + margin), width * 2,
                     height, margin);
             for (int i = 0; i < server.getConnections().size(); i++) {
                 Connection connection = server.getConnections().get(i);
                 addStringBox(connection.getName() + " (" + connection.getIP() + ")", margin,
-                        margin + (4 + i) * (height + margin), width, height,
+                        margin + (5 + i) * (height + margin), width, height,
                         margin);
             }
         }
