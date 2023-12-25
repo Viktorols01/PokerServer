@@ -58,10 +58,10 @@ public class HoldEmModel {
         this.smallBlind = Integer.valueOf(arguments[j++]);
         this.minBet = Integer.valueOf(arguments[j++]);
 
-        calculate();
+        calculateRemainingBets();
     }
 
-    private void calculate() {
+    private void calculateRemainingBets() {
         this.pot = 0;
         for (PlayerData player : players) {
             this.pot += player.getBettedMarkers();
@@ -76,7 +76,7 @@ public class HoldEmModel {
         return this.players;
     }
 
-    public PlayerData getToPlay() {
+    public PlayerData getWhoToPlay() {
         return this.toPlay;
     }
 

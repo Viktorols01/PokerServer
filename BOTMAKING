@@ -1,0 +1,58 @@
+To implement your own bot, the only thing that needs to be done is implementing the function "getMove(HoldEmModel model)".
+This function takes the state of the game (in the form of an object of class HoldEmModel) and returns a move (in the form of a protocol command).
+
+The HoldEmModel class has the following structure:
+    HoldEmModel
+    - getPlayers()
+        ArrayList<PlayerData>
+        - get(int i)
+            PlayerData*
+    - getWhoToPlay()
+        PlayerData*
+    - getYou()
+        PlayerData*
+    - getCommunityCards()
+        CardCollection**
+    - getPot()
+        int
+    - getRemainingBet()   
+        int
+    - getSmallBlind()
+        int
+
+    *PlayerData
+    - getName()
+        String
+    - getHand()
+        CardCollection**
+    - getMarkers()
+        int
+    - getBettedMarkers()
+        int
+    - getBlind()
+        String
+    - hasFolded()
+        boolean
+
+    **CardCollection
+    - get(int i)
+        Card***
+    - size()
+        int
+
+    ***Card
+    - getValue()
+        int
+    - getColor()
+        Color
+    - toString()
+        String
+
+Also, make sure to note that cards that are supposed to be unknown to you will simply be null.
+
+To make things simple, I have created shorthands for making certain moves. These are the available options:
+    return match()
+    return check()
+    return raise(int n)
+    return fold()
+Simply use these commands to perform the corresponding move. 

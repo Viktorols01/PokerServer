@@ -195,11 +195,11 @@ public abstract class PokerFrame extends RenderableFrame {
     protected final void addPlayerFrame(PlayerData player, int x, int y, int cardwidth, int cardheight,
             int cardmargin) {
         final Function offset;
-        if (player.equals(getModel().getToPlay())) {
+        if (player.equals(getModel().getWhoToPlay())) {
             offset = (q) -> {
                 return (int) (20 * q);
             };
-        } else if (player.equals(getPrevModel().getToPlay())) {
+        } else if (player.equals(getPrevModel().getWhoToPlay())) {
             offset = (q) -> {
                 return 20 - (int) (20 * q);
             };

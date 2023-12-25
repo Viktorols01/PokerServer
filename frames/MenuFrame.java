@@ -42,9 +42,10 @@ public class MenuFrame extends JFrame {
             instructionPanel.add(credLabel);
             instructionPanel.add(new JLabel(" "));
             instructionPanel.add(new JLabel("Instructions:"));
-            instructionPanel.add(new JLabel("1. Adjust settings"));
-            instructionPanel.add(new JLabel("2. Create a bot (optional)"));
-            instructionPanel.add(new JLabel("3. Join a server"));
+            instructionPanel.add(new JLabel("Start off by adjusting your client settings in the settings tab."));
+            instructionPanel.add(new JLabel("If you wish to use a bot, you can create one by modifying the file \"PokerServer/bots/MyBot.java\"."));
+            instructionPanel.add(new JLabel("For further instructions on bot-making, refer to the file \"PokerServer/BOTMAKING\"."));
+            instructionPanel.add(new JLabel("Now simply create or join a server."));
             tabbedPane.add(instructionPanel, "Instructions");
         }
 
