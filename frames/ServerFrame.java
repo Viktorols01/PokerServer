@@ -134,12 +134,12 @@ public class ServerFrame extends PokerFrame {
             final int margin = 10;
             addStringBox("Server is " + (server.isOpen() ? "open" : "closed") + ".", margin, margin + (0) * (height + margin), width * 2,
                     height * 2, margin * 2);
-            addStringBox("Players: ", margin, margin + (1) * (height + margin), width * 2,
+            addStringBox("Players: ", margin, margin + (2) * (height + margin), width * 2,
                     height, margin);
             for (int i = 0; i < server.getConnections().size(); i++) {
                 Connection connection = server.getConnections().get(i);
                 addStringBox(connection.getName() + " (" + connection.getIP() + ")", margin,
-                        margin + (2 + i) * (height + margin), width, height,
+                        margin + (3 + i) * (height + margin), width, height,
                         margin);
             }
         }
