@@ -45,7 +45,7 @@ public class Connection {
     public Connection(String ip, int port) {
         try {
             this.socket = new Socket();
-            this.socket.connect(new InetSocketAddress("localhost", port));
+            this.socket.connect(new InetSocketAddress(ip, port));
 
             init();
         } catch (IOException e) {
