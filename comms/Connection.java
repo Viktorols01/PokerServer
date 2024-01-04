@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Scanner;
@@ -100,6 +101,10 @@ public class Connection {
 
     public String getIP() {
         return this.socket.getInetAddress().getHostAddress();
+    }
+
+    public InetAddress getInetAddress() {
+        return this.socket.getInetAddress();
     }
 
     public void setName(String name) {

@@ -46,6 +46,7 @@ public class MenuFrame extends JFrame {
             instructionPanel.add(new JLabel("If you wish to use a bot, you can create one by modifying the file \"PokerServer/bots/MyBot.java\"."));
             instructionPanel.add(new JLabel("For further instructions on bot-making, refer to the file \"PokerServer/BOTMAKING\"."));
             instructionPanel.add(new JLabel("Now simply create or join a server."));
+            instructionPanel.add(new JLabel("Make sure to be on a trusted network. Det har fungerat tidigare bror lita på mig tack"));
             tabbedPane.add(instructionPanel, "Instructions");
         }
 

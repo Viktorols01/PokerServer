@@ -3,12 +3,11 @@ package comms;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import comms.Connection.Type;
-
-public abstract class Server {
+public abstract class ConnectionServer {
 
     protected ServerSocket serversocket;
     protected List<Connection> connections;
@@ -16,7 +15,7 @@ public abstract class Server {
     protected Thread joinListener;
     protected boolean open;
 
-    public Server(int port) {
+    public ConnectionServer(int port) {
         try {
             this.serversocket = new ServerSocket(port);
             this.connections = new ArrayList<Connection>();
@@ -42,29 +41,17 @@ public abstract class Server {
         System.out.println("Listening for connections closed.");
     }
 
-    protected abstract void joinListen();
+    protected abstract void joinHandle(Connection connection);
 
-    protected final void addConnection(Connection connection, String name) {
-        connection.setName(name);
-        connections.add(connection);
-        System.out
-                .println(connection.getSocket().getInetAddress().getHostAddress() + " connected as " + name
-                        + ".");
-        String[] arguments = new String[] {};
-        Protocol.sendPackage(Protocol.Command.ACCEPTED_JOIN, arguments, connection);
-    }
-
-    protected final static void rejectConnection(Connection connection, String reason) {
-        System.out
-                .println(connection.getSocket().getInetAddress().getHostAddress() + " was rejected.");
-        Protocol.sendPackage(Protocol.Command.DENIED_JOIN, new String[] { reason }, connection);
-        connection.close();
-    }
-
-    protected final static void setType(Connection connection, Type type) {
-        connection.setType(type);
-        System.out.println(connection.getName() + " changed to " + type);
-        Protocol.sendPackage(Protocol.Command.ACCEPTED_TYPE, new String[] {}, connection);
+    protected void joinListen() {
+        try {
+            Socket socket;
+            socket = serversocket.accept();
+            Connection connection = new Connection(socket);
+            joinHandle(connection);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean isOpen() {
