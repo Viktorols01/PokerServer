@@ -32,13 +32,16 @@ public abstract class ConnectionServer {
             }
         }, "joinListener");
         this.joinListener.start();
-        System.out.println("Listening for connections...");
     }
 
     public void closeConnections() {
         this.open = false;
         this.joinListener.interrupt();
-        System.out.println("Listening for connections closed.");
+    }
+
+    protected void accept(Connection connection, String name) {
+        connection.setName(name);
+        connections.add(connection);
     }
 
     protected abstract void joinHandle(Connection connection);

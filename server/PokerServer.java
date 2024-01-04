@@ -1,8 +1,5 @@
 package server;
 
-import java.io.IOException;
-import java.net.Socket;
-
 import comms.Broadcaster;
 import comms.Connection;
 import comms.Connection.Type;
@@ -58,8 +55,7 @@ public class PokerServer extends ConnectionServer {
     }
 
     protected final void addConnection(Connection connection, String name) {
-        connection.setName(name);
-        connections.add(connection);
+        accept(connection, name);
         System.out
                 .println(connection.getSocket().getInetAddress().getHostAddress() + " connected as " + name
                         + ".");
