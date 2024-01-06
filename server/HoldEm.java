@@ -13,6 +13,7 @@ import poker.HandRank;
 import poker.HoldEmModel;
 import protocol.ProtocolCommand;
 import protocol.ProtocolHandler;
+import protocol.ProtocolPackage;
 import tools.Broadcaster;
 
 public class HoldEm {
@@ -222,11 +223,12 @@ public class HoldEm {
             }
 
             sendGameInfo(player.getName() + " to play.", false);
+            
+            protocolHandler.sendPackage(ProtocolCommand.REQUEST_MOVE, new String[] {}, player.getConnection());
+             ProtocolPackage pkg = protocolHandler.readPackage(player.getConnection());
 
-            ProtocolCommand command = requestMove(player);
-
-            if (command == ProtocolCommand.SEND_MOVE) {
-                String[] arguments = protocolHandler.readArguments(command, player.getConnection());
+            if (pkg.command == ProtocolCommand.SEND_MOVE) {
+                String[] arguments = pkg.arguments;
                 String move = arguments[0];
                 int value;
                 try {
@@ -483,16 +485,10 @@ public class HoldEm {
 
     private boolean requestContinue(Connection connection) {
         protocolHandler.sendPackage(ProtocolCommand.REQUEST_CONTINUE, new String[] {}, connection);
-        ProtocolCommand command = protocolHandler.readCommand(connection);
-        boolean doContinue = (command == ProtocolCommand.SEND_CONTINUE);
+        ProtocolPackage pkg = protocolHandler.readPackage(connection);
+        boolean doContinue = (pkg.command == ProtocolCommand.SEND_CONTINUE);
         return doContinue;
 
-    }
-
-    private ProtocolCommand requestMove(PokerPlayer player) {
-        protocolHandler.sendPackage(ProtocolCommand.REQUEST_MOVE, new String[] {}, player.getConnection());
-        ProtocolCommand command = protocolHandler.readCommand(player.getConnection());
-        return command;
     }
 
     public boolean isFinished() {

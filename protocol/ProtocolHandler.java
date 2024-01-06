@@ -23,21 +23,20 @@ public class ProtocolHandler {
         this.verbose = verbose;
     }
 
-    public ProtocolCommand readCommand(Connection connection) {
+    private ProtocolCommand readCommand(Connection connection) {
         ProtocolCommand command;
         while (connection.hasNextLine()) {
             try {
                 command = ProtocolCommand.valueOf(connection.nextLine().toUpperCase());
                 return command;
             } catch (IllegalArgumentException e) {
-                continue;
+                return ProtocolCommand.UNKNOWN_COMMAND;
             }
         }
-        printUnknown(connection);
         return ProtocolCommand.UNKNOWN_COMMAND;
     }
 
-    public String[] readArguments(ProtocolCommand command, Connection connection) {
+    private String[] readArguments(ProtocolCommand command, Connection connection) {
         String[] arguments;
 
         switch (command) {
@@ -148,14 +147,24 @@ public class ProtocolHandler {
                 arguments = new String[] {};
                 break;
         }
-        printReceive(command, arguments, connection);
         return arguments;
     }
 
     public ProtocolPackage readPackage(Connection connection) {
         ProtocolCommand command = readCommand(connection);
         String[] arguments = readArguments(command, connection);
+        printReceive(command, arguments, connection);
         return new ProtocolPackage(command, arguments);
+    }
+
+    public void sendPackage(ProtocolPackage pkg, Connection connection) {
+        StringBuilder str = new StringBuilder(pkg.command.name());
+        for (String arg : pkg.arguments) {
+            str.append("\n");
+            str.append(arg);
+        }
+        printSend(pkg.command, pkg.arguments, connection);
+        connection.write(str.toString());
     }
 
     public void sendPackage(ProtocolCommand command, String[] arguments, Connection connection) {
@@ -164,8 +173,8 @@ public class ProtocolHandler {
             str.append("\n");
             str.append(arg);
         }
-        connection.write(str.toString());
         printSend(command, arguments, connection);
+        connection.write(str.toString());
     }
 
     private void printReceive(ProtocolCommand command, String[] arguments, Connection connection) {
@@ -187,13 +196,6 @@ public class ProtocolHandler {
                 System.out.println("\t" + argument);
             }
             System.out.println("");
-        }
-    }
-
-    private void printUnknown(Connection connection) {
-        if (verbose) {
-            System.out.println(
-                    "\u001b[22m" + name + " received unknown command from " + connection.getName() + "\u001b[0m");
         }
     }
 }

@@ -75,7 +75,7 @@ public class MenuFrame extends JFrame {
             JButton botButton = new JButton("Bot play");
             botButton.addActionListener((e) -> {
                 PokerClient client = new BotClient(getClientName(), new MyBot(),
-                        true);
+                        false);
                 client.connect(getIP(), getPort());
             });
             clientPanel.add(botButton);
@@ -83,7 +83,7 @@ public class MenuFrame extends JFrame {
 
             JButton youButton = new JButton("You play");
             youButton.addActionListener((e) -> {
-                PokerClient client = new YouClient(getClientName(), true);
+                PokerClient client = new YouClient(getClientName(), false);
                 client.connect(getIP(), getPort());
             });
             clientPanel.add(youButton);
@@ -91,7 +91,7 @@ public class MenuFrame extends JFrame {
 
             JButton spectateButton = new JButton("Spectate");
             spectateButton.addActionListener((e) -> {
-                PokerClient client = new SpectatorClient(getClientName(), true);
+                PokerClient client = new SpectatorClient(getClientName(), false);
                 client.connect(getIP(), getPort());
             });
             clientPanel.add(spectateButton);

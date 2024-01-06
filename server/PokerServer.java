@@ -4,6 +4,7 @@ import comms.Connection;
 import comms.Connection.Type;
 import protocol.ProtocolCommand;
 import protocol.ProtocolHandler;
+import protocol.ProtocolPackage;
 import tools.Broadcaster;
 import comms.ConnectionServer;
 
@@ -82,9 +83,9 @@ public class PokerServer extends ConnectionServer {
 
         protocolHandler.sendPackage(ProtocolCommand.REQUEST_NAME, new String[0], connection);
         try {
-            ProtocolCommand command = protocolHandler.readCommand(connection);
-            if (command == ProtocolCommand.SEND_NAME) {
-                String name = protocolHandler.readArguments(command, connection)[0];
+            ProtocolPackage pkg = protocolHandler.readPackage(connection);
+            if (pkg.command == ProtocolCommand.SEND_NAME) {
+                String name = pkg.arguments[0];
                 boolean nameTaken = false;
                 for (Connection c : connections) {
                     if (c.getName().equals(name)) {
@@ -107,10 +108,10 @@ public class PokerServer extends ConnectionServer {
         }
         protocolHandler.sendPackage(ProtocolCommand.REQUEST_TYPE, new String[0], connection);
         try {
-            ProtocolCommand command = protocolHandler.readCommand(connection);
-            if (command == ProtocolCommand.SEND_TYPE) {
+            ProtocolPackage pkg = protocolHandler.readPackage(connection);
+            if (pkg.command == ProtocolCommand.SEND_TYPE) {
                 if (connection.getType() == null) {
-                    String[] arguments = protocolHandler.readArguments(ProtocolCommand.SEND_TYPE, connection);
+                    String[] arguments = pkg.arguments;
                     Connection.Type type = Connection.Type.valueOf(arguments[0].toUpperCase());
                     switch (type) {
                         case PLAYER:

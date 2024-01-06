@@ -6,6 +6,7 @@ import comms.Connection;
 import poker.HoldEmModel;
 import protocol.ProtocolCommand;
 import protocol.ProtocolHandler;
+import protocol.ProtocolPackage;
 
 public abstract class PokerClient {
     private Connection connection;
@@ -42,8 +43,8 @@ public abstract class PokerClient {
     private final void start() {
         this.readThread = new Thread(() -> {
             while (true) {
-                ProtocolCommand command = protocolHandler.readCommand(connection);
-                switch (command) {
+                ProtocolPackage pkg = protocolHandler.readPackage(connection);
+                switch (pkg.command) {
                     case REQUEST_NAME: {
                         String[] arguments = getName();
                         protocolHandler.sendPackage(ProtocolCommand.SEND_NAME, arguments, connection);
@@ -53,7 +54,7 @@ public abstract class PokerClient {
                         break;
                     }
                     case DENIED_JOIN: {
-                        String[] arguments = protocolHandler.readArguments(ProtocolCommand.DENIED_JOIN, connection);
+                        String[] arguments = pkg.arguments;
                         JOptionPane.showMessageDialog(null, "Your client has been denied! Reason:" + arguments[0]);
                         break;
                     }
@@ -68,24 +69,24 @@ public abstract class PokerClient {
                         break;
                     }
                     case DENIED_MOVE: {
-                        String[] arguments = protocolHandler.readArguments(ProtocolCommand.DENIED_MOVE, connection);
+                        String[] arguments = pkg.arguments;
                         JOptionPane.showMessageDialog(null,
                                 "Your clients move has been denied! Reason: " + arguments[0]);
                         break;
                     }
                     case REQUEST_CONTINUE: {
                         String[] arguments = getContinue();
-                        protocolHandler.sendPackage(command, arguments, connection);
+                        protocolHandler.sendPackage(ProtocolCommand.SEND_CONTINUE, arguments, connection);
                         break;
                     }
                     case SEND_POKERSTATE: {
-                        String[] arguments = protocolHandler.readArguments(command, connection);
+                        String[] arguments = pkg.arguments;
                         this.model = new HoldEmModel(arguments);
                         display(model);
                         break;
                     }
                     case SEND_MESSAGE: {
-                        String[] arguments = protocolHandler.readArguments(command, connection);
+                        String[] arguments = pkg.arguments;
                         String message = arguments[0];
                         parseMessage(message);
                         break;
