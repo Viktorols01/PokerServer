@@ -18,7 +18,7 @@ public abstract class RenderableFrame {
     }
 
     private void initJFrame() {
-        jframe.setDefaultCloseOperation(3);
+        jframe.setDefaultCloseOperation(2); // MEN STÄNG AV SERVERN OCKSÅ
         addComponents(jframe);
         jframe.pack();
         jframe.setResizable(false);

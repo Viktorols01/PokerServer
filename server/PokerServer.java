@@ -1,10 +1,10 @@
 package server;
 
-import comms.Broadcaster;
 import comms.Connection;
 import comms.Connection.Type;
-import comms.Protocol;
-import comms.Protocol.Command;
+import protocol.ProtocolCommand;
+import protocol.ProtocolHandler;
+import tools.Broadcaster;
 import comms.ConnectionServer;
 
 public class PokerServer extends ConnectionServer {
@@ -13,10 +13,13 @@ public class PokerServer extends ConnectionServer {
     private Thread gameThread;
     private Broadcaster joinedSender;
 
+    private ProtocolHandler protocolHandler;
+
     public PokerServer(int port) {
         super(port);
         this.game = new HoldEm(this);
         this.joinedSender = new Broadcaster();
+        this.protocolHandler = new ProtocolHandler("Server", true);
     }
 
     public void startGame() {
@@ -56,41 +59,32 @@ public class PokerServer extends ConnectionServer {
 
     protected final void addConnection(Connection connection, String name) {
         accept(connection, name);
-        System.out
-                .println(connection.getSocket().getInetAddress().getHostAddress() + " connected as " + name
-                        + ".");
-        String[] arguments = new String[] {};
-        Protocol.sendPackage(Protocol.Command.ACCEPTED_JOIN, arguments, connection);
+        protocolHandler.sendPackage(ProtocolCommand.ACCEPTED_JOIN, new String[] {}, connection);
     }
 
-    protected final static void rejectConnection(Connection connection, String reason) {
-        System.out
-                .println(connection.getSocket().getInetAddress().getHostAddress() + " was rejected.");
-        Protocol.sendPackage(Protocol.Command.DENIED_JOIN, new String[] { reason }, connection);
+    protected final void rejectConnection(Connection connection, String reason) {
+        protocolHandler.sendPackage(ProtocolCommand.DENIED_JOIN, new String[] { reason }, connection);
         connection.close();
     }
 
-    protected final static void setType(Connection connection, Type type) {
+    protected final void setType(Connection connection, Type type) {
         connection.setType(type);
-        System.out.println(connection.getName() + " changed to " + type);
-        Protocol.sendPackage(Protocol.Command.ACCEPTED_TYPE, new String[] {}, connection);
+        protocolHandler.sendPackage(ProtocolCommand.ACCEPTED_TYPE, new String[] {}, connection);
     }
 
     @Override
     protected void joinHandle(Connection connection) {
-        System.out.println(connection.getInetAddress().getHostAddress() + " is trying to connect...");
-
         if (!this.open) {
             rejectConnection(connection, connection.getInetAddress().getHostAddress()
                     + " tried to connect but server is closed.");
             return;
         }
 
-        Protocol.sendPackage(Protocol.Command.REQUEST_NAME, new String[0], connection);
+        protocolHandler.sendPackage(ProtocolCommand.REQUEST_NAME, new String[0], connection);
         try {
-            Protocol.Command command = Protocol.readCommand(connection);
-            if (command == Protocol.Command.SEND_NAME) {
-                String name = Protocol.readArguments(command, connection)[0];
+            ProtocolCommand command = protocolHandler.readCommand(connection);
+            if (command == ProtocolCommand.SEND_NAME) {
+                String name = protocolHandler.readArguments(command, connection)[0];
                 boolean nameTaken = false;
                 for (Connection c : connections) {
                     if (c.getName().equals(name)) {
@@ -111,12 +105,12 @@ public class PokerServer extends ConnectionServer {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Protocol.sendPackage(Protocol.Command.REQUEST_TYPE, new String[0], connection);
+        protocolHandler.sendPackage(ProtocolCommand.REQUEST_TYPE, new String[0], connection);
         try {
-            Protocol.Command command = Protocol.readCommand(connection);
-            if (command == Protocol.Command.SEND_TYPE) {
+            ProtocolCommand command = protocolHandler.readCommand(connection);
+            if (command == ProtocolCommand.SEND_TYPE) {
                 if (connection.getType() == null) {
-                    String[] arguments = Protocol.readArguments(Command.SEND_TYPE, connection);
+                    String[] arguments = protocolHandler.readArguments(ProtocolCommand.SEND_TYPE, connection);
                     Connection.Type type = Connection.Type.valueOf(arguments[0].toUpperCase());
                     switch (type) {
                         case PLAYER:
@@ -126,7 +120,7 @@ public class PokerServer extends ConnectionServer {
                             setType(connection, type);
                             break;
                         default:
-                            Protocol.sendPackage(Protocol.Command.DENIED_TYPE, new String[] { "Invalid type" },
+                        protocolHandler.sendPackage(ProtocolCommand.DENIED_TYPE, new String[] { "Invalid type" },
                                     connection);
                             break;
                     }

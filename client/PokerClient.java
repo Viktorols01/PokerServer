@@ -3,24 +3,25 @@ package client;
 import javax.swing.JOptionPane;
 
 import comms.Connection;
-import comms.Protocol;
 import poker.HoldEmModel;
+import protocol.ProtocolCommand;
+import protocol.ProtocolHandler;
 
 public abstract class PokerClient {
     private Connection connection;
-    private Thread thread;
+    private Thread readThread;
+    private ProtocolHandler protocolHandler;
 
     private HoldEmModel model;
 
-    private Printer printer;
-
     public PokerClient(boolean verbose) {
-        this.printer = new Printer(verbose);
+        this.protocolHandler = new ProtocolHandler("Client", verbose);
         this.setup();
     }
 
     public void connect(String ip, int port) {
         this.connection = new Connection(ip, port);
+        this.connection.setName("Server");
         this.start();
     }
 
@@ -39,52 +40,52 @@ public abstract class PokerClient {
     protected abstract void parseMessage(String message);
 
     private final void start() {
-        this.thread = new Thread(() -> {
+        this.readThread = new Thread(() -> {
             while (true) {
-                Protocol.Command command = readCommand();
+                ProtocolCommand command = protocolHandler.readCommand(connection);
                 switch (command) {
                     case REQUEST_NAME: {
                         String[] arguments = getName();
-                        sendCommand(Protocol.Command.SEND_NAME, arguments);
+                        protocolHandler.sendPackage(ProtocolCommand.SEND_NAME, arguments, connection);
                         break;
                     }
                     case ACCEPTED_JOIN: {
                         break;
                     }
                     case DENIED_JOIN: {
-                        String[] arguments = Protocol.readArguments(Protocol.Command.DENIED_JOIN, connection);
+                        String[] arguments = protocolHandler.readArguments(ProtocolCommand.DENIED_JOIN, connection);
                         JOptionPane.showMessageDialog(null, "Your client has been denied! Reason:" + arguments[0]);
                         break;
                     }
                     case REQUEST_TYPE: {
                         String[] arguments = getType();
-                        sendCommand(Protocol.Command.SEND_TYPE, arguments);
+                        protocolHandler.sendPackage(ProtocolCommand.SEND_TYPE, arguments, connection);
                         break;
                     }
                     case REQUEST_MOVE: {
                         String[] arguments = getMove(model);
-                        sendCommand(Protocol.Command.SEND_MOVE, arguments);
+                        protocolHandler.sendPackage(ProtocolCommand.SEND_MOVE, arguments, connection);
                         break;
                     }
                     case DENIED_MOVE: {
-                        String[] arguments = Protocol.readArguments(Protocol.Command.DENIED_MOVE, connection);
+                        String[] arguments = protocolHandler.readArguments(ProtocolCommand.DENIED_MOVE, connection);
                         JOptionPane.showMessageDialog(null,
                                 "Your clients move has been denied! Reason: " + arguments[0]);
                         break;
                     }
                     case REQUEST_CONTINUE: {
                         String[] arguments = getContinue();
-                        sendCommand(Protocol.Command.SEND_CONTINUE, arguments);
+                        protocolHandler.sendPackage(command, arguments, connection);
                         break;
                     }
                     case SEND_POKERSTATE: {
-                        String[] arguments = readArguments(command);
+                        String[] arguments = protocolHandler.readArguments(command, connection);
                         this.model = new HoldEmModel(arguments);
                         display(model);
                         break;
                     }
                     case SEND_MESSAGE: {
-                        String[] arguments = readArguments(command);
+                        String[] arguments = protocolHandler.readArguments(command, connection);
                         String message = arguments[0];
                         parseMessage(message);
                         break;
@@ -94,47 +95,24 @@ public abstract class PokerClient {
                 }
             }
         });
-        this.thread.start();
+        this.readThread.start();
     }
 
-    private void sendCommand(Protocol.Command command, String[] arguments) {
-        printer.print("sent command: " + command);
-        Protocol.sendPackage(command, arguments, connection);
-    }
+    // private void sendCommand(ProtocolCommand command, String[] arguments) {
+    // protocolReader.sendPackage(command, arguments, connection);
+    // }
 
-    private Protocol.Command readCommand() {
-        Protocol.Command command = Protocol.readCommand(connection);
-        printer.print("received command: " + command);
-        return command;
-    }
+    // private ProtocolCommand readCommand() {
+    // ProtocolCommand command = protocolReader.readCommand(connection);
+    // return command;
+    // }
 
-    private String[] readArguments(Protocol.Command command) {
-        String[] arguments = Protocol.readArguments(command, connection);
-        StringBuilder str = new StringBuilder();
-        str.append("received arguments: ");
-        for (String argument : arguments) {
-            str.append("\n");
-            str.append(argument);
-        }
-        printer.print(str.toString());
-        return arguments;
-    }
+    // private String[] readArguments(ProtocolCommand command) {
+    // String[] arguments = protocolReader.readArguments(command, connection);
+    // return arguments;
+    // }
 
     public HoldEmModel getModel() {
         return this.model;
-    }
-
-    private class Printer {
-        private boolean print;
-
-        public Printer(boolean print) {
-            this.print = print;
-        }
-
-        public void print(String message) {
-            if (this.print) {
-                System.out.println("Client " + message);
-            }
-        }
     }
 }

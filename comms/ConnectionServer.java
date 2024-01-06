@@ -10,6 +10,7 @@ import java.util.List;
 public abstract class ConnectionServer {
 
     protected ServerSocket serversocket;
+    protected int port;
     protected List<Connection> connections;
 
     protected Thread joinListener;
@@ -18,6 +19,7 @@ public abstract class ConnectionServer {
     public ConnectionServer(int port) {
         try {
             this.serversocket = new ServerSocket(port);
+            this.port = port;
             this.connections = new ArrayList<Connection>();
         } catch (IOException e) {
             e.printStackTrace();
@@ -25,18 +27,22 @@ public abstract class ConnectionServer {
     }
 
     public void openConnections() {
-        this.open = true;
-        this.joinListener = new Thread(() -> {
-            while (true) {
-                joinListen();
-            }
-        }, "joinListener");
-        this.joinListener.start();
+        if (!open) {
+            this.open = true;
+            this.joinListener = new Thread(() -> {
+                while (true) {
+                    joinListen();
+                }
+            }, "joinListener");
+            this.joinListener.start();
+        }
     }
 
     public void closeConnections() {
-        this.open = false;
-        this.joinListener.interrupt();
+        if (open) {
+            this.open = false;
+            this.joinListener.interrupt();
+        }
     }
 
     protected void accept(Connection connection, String name) {

@@ -5,15 +5,17 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
-import comms.Broadcaster;
 import comms.Connection;
 import server.PokerPlayer;
 import server.PokerServer;
+import tools.Broadcaster;
 
 public class ServerFrame extends PokerFrame {
 
@@ -99,6 +101,12 @@ public class ServerFrame extends PokerFrame {
         container.add(startButton);
         jframe.add(getGUI(), BorderLayout.CENTER);
         jframe.add(container, BorderLayout.SOUTH);
+
+        jframe.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                server.closeConnections();
+            }
+        });
     }
 
     @Override
@@ -117,7 +125,8 @@ public class ServerFrame extends PokerFrame {
                 addStringBox(player.getName(), margin, margin + i * (height + margin), width, height, margin);
                 addStringBox("Game wins: " + player.getPlayerStatistics().getGameWins(), margin + 1 * (width + margin),
                         margin + i * (height + margin), width, height, margin);
-                addStringBox("Theoretical wins: " + player.getPlayerStatistics().getTheoreticalHandWins(), margin + 2 * (width + margin),
+                addStringBox("Theoretical wins: " + player.getPlayerStatistics().getTheoreticalHandWins(),
+                        margin + 2 * (width + margin),
                         margin + i * (height + margin), width, height, margin);
                 addStringBox("Wins: " + player.getPlayerStatistics().getHandWins(), margin + 3 * (width + margin),
                         margin + i * (height + margin), width, height, margin);
@@ -132,7 +141,8 @@ public class ServerFrame extends PokerFrame {
             final int height = 50;
             final int width = 500;
             final int margin = 10;
-            addStringBox("Server is " + (server.isOpen() ? "open" : "closed") + ".", margin, margin + (0) * (height + margin), width * 2,
+            addStringBox("Server is " + (server.isOpen() ? "open" : "closed") + ".", margin,
+                    margin + (0) * (height + margin), width * 2,
                     height * 2, margin * 2);
             addStringBox("Players: ", margin, margin + (2) * (height + margin), width * 2,
                     height, margin);
