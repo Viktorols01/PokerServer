@@ -1,5 +1,7 @@
 package server;
 
+import java.io.IOException;
+
 import comms.Connection;
 import comms.Connection.Type;
 import protocol.ProtocolCommand;
@@ -16,7 +18,7 @@ public class PokerServer extends ConnectionServer {
 
     private ProtocolHandler protocolHandler;
 
-    public PokerServer(int port) {
+    public PokerServer(int port) throws IOException {
         super(port);
         this.game = new HoldEm(this);
         this.joinedSender = new Broadcaster();
