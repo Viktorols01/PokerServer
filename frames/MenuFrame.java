@@ -1,6 +1,7 @@
 package frames;
 
 import java.awt.Dimension;
+import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
 
@@ -10,6 +11,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
@@ -39,13 +41,17 @@ public class MenuFrame extends JFrame {
             instructionPanel.add(credLabel);
             instructionPanel.add(new JLabel(" "));
             instructionPanel.add(new JLabel("Instructions:"));
-            instructionPanel.add(new JLabel("To play with others, make sure you are both connected to the same network."));
+            instructionPanel
+                    .add(new JLabel("To play with others, make sure you are both connected to the same network."));
             instructionPanel.add(new JLabel("The network needs to be trusted by your firewall."));
-            instructionPanel.add(new JLabel("You can join the server running on your computer by connecting to \"localhost\"."));
+            instructionPanel.add(
+                    new JLabel("You can join the server running on your computer by connecting to \"localhost\"."));
             instructionPanel.add(new JLabel(" "));
-            instructionPanel.add(new JLabel("If you wish to modify your bot, rewrite the contents in file \"bots/MyBot.java\"."));
-            instructionPanel.add(new JLabel("For further instructions on bot-making, refer to the file \"BOTMAKING\"."));
-            
+            instructionPanel.add(
+                    new JLabel("If you wish to modify your bot, rewrite the contents in file \"bots/MyBot.java\"."));
+            instructionPanel
+                    .add(new JLabel("For further instructions on bot-making, refer to the file \"BOTMAKING\"."));
+
             instructionPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
             tabbedPane.add(instructionPanel, "Instructions");
         }
@@ -54,7 +60,7 @@ public class MenuFrame extends JFrame {
             JPanel clientPanel = new JPanel();
             SpringLayout layout = new SpringLayout();
             clientPanel.setLayout(layout);
-            
+
             JLabel nameLabel = new JLabel("Name: ");
             nameField = new JTextField("Player");
             nameField.setPreferredSize(new Dimension(200, 25));
@@ -112,7 +118,15 @@ public class MenuFrame extends JFrame {
             }
             JButton serverButton = new JButton("Create server");
             serverButton.addActionListener((e) -> {
-                new ServerFrame(new PokerServer(getPort()), 1200, 800);
+                try {
+                    PokerServer server = new PokerServer(getPort());
+                    new ServerFrame(server, 1200, 800);
+                } catch (IOException e1) {
+                    JOptionPane.showMessageDialog(null, e1.getMessage() + " (" + getIP() + ", " + getPort() + ")",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    e1.printStackTrace();
+                }
             });
             serverPanel.add(serverButton);
 
@@ -124,7 +138,7 @@ public class MenuFrame extends JFrame {
             JPanel settingsPanel = new JPanel();
             SpringLayout layout = new SpringLayout();
             settingsPanel.setLayout(layout);
-     
+
             JLabel portLabel = new JLabel("Port: ");
             portField = new JTextField("50160");
             portField.setPreferredSize(new Dimension(100, 25));

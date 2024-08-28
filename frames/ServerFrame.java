@@ -33,7 +33,7 @@ public class ServerFrame extends PokerFrame {
     public ServerFrame(PokerServer server, int width, int height) {
         super(width, height);
         this.server = server;
-        getJFrame().setTitle("ServerFrame | closed");
+        getJFrame().setTitle("ServerFrame | closed | (" + server.getIP() + ", " + server.getPort() + ")");
         addListeners();
 
         updateRenderables();

@@ -16,14 +16,11 @@ public abstract class ConnectionServer {
     protected Thread joinListener;
     protected boolean open;
 
-    public ConnectionServer(int port) {
-        try {
-            this.serversocket = new ServerSocket(port);
-            this.port = port;
-            this.connections = new ArrayList<Connection>();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public ConnectionServer(int port) throws IOException {
+        this.serversocket = new ServerSocket(port);
+        this.port = port;
+        this.connections = new ArrayList<Connection>();
+
     }
 
     public void openConnections() {
