@@ -1,10 +1,11 @@
-[] Simplify use of getModel()
-
-[] You can only raise once? Not sure
-
 [] Handle people leaving
-
-[] The "REQUEST_CONTINUE" system should be revamped...
+[] Add ability to kick others
+[] Better server window (Use swing instead of custom graphics)
+[] No OCD-invoking menus
+[] Turn off and on server
+[] Implement timer for receiving moves
+[] The "REQUEST_CONTINUE" system should be revamped...?
+[] Structure HoldEm into different classes
 
 [] Hilarious markers
 [] Perfect GUI

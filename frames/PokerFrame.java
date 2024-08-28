@@ -1,15 +1,6 @@
 package frames;
 
-import java.awt.AlphaComposite;
 import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
 
 import poker.Card;
 import poker.CardCollection;
@@ -24,23 +15,11 @@ public abstract class PokerFrame extends RenderableFrame {
     private HoldEmModel model;
     private String message;
 
-    private static BufferedImage hearts;
-    private static BufferedImage diamonds;
-    private static BufferedImage spades;
-    private static BufferedImage clubs;
-    private static BufferedImage unknown;
+    private PokerRenderer renderer;
 
     public PokerFrame(int width, int height) {
         super(width, height);
-        try {
-            hearts = ImageIO.read(new File("images/hearts.png"));
-            diamonds = ImageIO.read(new File("images/diamonds.png"));
-            spades = ImageIO.read(new File("images/spades.png"));
-            clubs = ImageIO.read(new File("images/clubs.png"));
-            unknown = ImageIO.read(new File("images/unknown.png"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.renderer = new PokerRenderer();
     }
 
     protected abstract void onUpdateModel();
@@ -149,7 +128,7 @@ public abstract class PokerFrame extends RenderableFrame {
             }
 
             addRenderable(0.2, (g, q) -> {
-                renderCard(g, card, x + (fi) * (cardwidth + cardmargin),
+                renderer.renderCard(g, card, x + (fi) * (cardwidth + cardmargin),
                         y + (int) (offsetY.f(q)), cardwidth, cardheight, cardmargin, alpha.f(q));
             });
         }
@@ -181,7 +160,7 @@ public abstract class PokerFrame extends RenderableFrame {
             g.setColor(new Color(0, 0, 0, 100));
             g.fillRoundRect(x, y, width,
                     height, 5, 5);
-            renderString(g, str, x + margin, y + margin, height / 2, new Color(255, 255, 255));
+            renderer.renderString(g, str, x + margin, y + margin, height / 2, new Color(255, 255, 255));
         });
     }
 
@@ -219,7 +198,7 @@ public abstract class PokerFrame extends RenderableFrame {
             final int fi = i;
             Card card = player.getHand().get(i);
             addRenderable(0.1, (g, q) -> {
-                renderCard(g, card, x + (int) (offset.f(q)) + fi * (cardwidth + cardmargin),
+                renderer.renderCard(g, card, x + (int) (offset.f(q)) + fi * (cardwidth + cardmargin),
                         y,
                         cardwidth,
                         cardheight,
@@ -234,72 +213,24 @@ public abstract class PokerFrame extends RenderableFrame {
             color = new Color(255, 255, 255);
         }
         addRenderable(0.1, (g, q) -> {
-            renderString(g, player.getName(),
+            renderer.renderString(g, player.getName(),
                     x + (int) (offset.f(q)) + player.getHand().size() * (cardwidth + cardmargin),
                     y,
                     cardheight / 4, color);
-            renderString(g, "Markers: " + player.getMarkers(),
+            renderer.renderString(g, "Markers: " + player.getMarkers(),
                     x + (int) (offset.f(q)) + player.getHand().size() * (cardwidth + cardmargin),
                     y + cardheight * 1 / 4,
                     cardheight / 4, color);
-            renderString(g, "Bets: " + player.getBettedMarkers(),
+            renderer.renderString(g, "Bets: " + player.getBettedMarkers(),
                     x + (int) (offset.f(q)) + player.getHand().size() * (cardwidth + cardmargin),
                     y + cardheight * 2 / 4,
                     cardheight / 5, color);
-            renderString(g,
+            renderer.renderString(g,
                     HandRank.rank(CardCollection.join(getModel().getCommunityCards(), player.getHand())).toString(),
                     x + (int) (offset.f(q)) + player.getHand().size() * (cardwidth + cardmargin),
                     y + cardheight * 3 / 4,
                     cardheight / 5, color);
 
         });
-    }
-
-    protected static void renderCard(Graphics g, Card card, int x, int y, int width, int height, int margin,
-            float alpha) {
-        g.setColor(new Color(255, 255, 255, (int) (255 * alpha)));
-        g.fillRoundRect(x, y, width, height, margin, margin);
-
-        BufferedImage image;
-        if (card == null) {
-            image = unknown;
-            renderImage(g, image, x + margin, y + margin, width - margin * 2, height - margin * 2, alpha);
-        } else {
-            Card.Color color = card.getColor();
-            switch (color) {
-                case DIAMONDS:
-                    image = diamonds;
-                    break;
-                case HEARTS:
-                    image = hearts;
-                    break;
-                case SPADES:
-                    image = spades;
-                    break;
-                case CLUBS:
-                    image = clubs;
-                    break;
-                default:
-                    image = null;
-                    break;
-            }
-            renderImage(g, image, x + margin, y + margin, width - margin * 2, height - margin * 2, alpha);
-
-            renderString(g, card.getValueString(), x, y, height / 4, new Color(0, 0, 0, alpha));
-        }
-    }
-
-    protected static void renderImage(Graphics g, BufferedImage image, int x, int y, int width, int height,
-            float alpha) {
-        Graphics2D g2d = (Graphics2D) g;
-        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
-        g.drawImage(image, x, y, width, height, null);
-        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1));
-    }
-
-    protected static void renderString(Graphics g, String str, int x, int y, int size, Color color) {
-        g.setColor(color);
-        g.setFont(new Font("Arial", Font.BOLD, size));
-        g.drawString(str, x, y + size);
     }
 }

@@ -5,7 +5,7 @@ import java.util.Random;
 
 public class Deck extends CardCollection {
     public Deck() {
-        for (Card.Color color : Card.Color.values()) {
+        for (Card.Suit color : Card.Suit.values()) {
             for (int value = 1; value <= 13; value++) {
                 this.cards.add(new Card(color, value));
             }

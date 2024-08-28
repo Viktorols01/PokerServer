@@ -309,7 +309,7 @@ public class HandRank {
         }
 
         private Card getCard(int colorIndex, int value) {
-            return new Card(Card.Color.values()[colorIndex], value);
+            return new Card(Card.Suit.values()[colorIndex], value);
         }
 
         private boolean hasCard(int colorIndex, int value) {

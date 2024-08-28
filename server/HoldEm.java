@@ -223,9 +223,9 @@ public class HoldEm {
             }
 
             sendGameInfo(player.getName() + " to play.", false);
-            
+
             protocolHandler.sendPackage(ProtocolCommand.REQUEST_MOVE, new String[] {}, player.getConnection());
-             ProtocolPackage pkg = protocolHandler.readPackage(player.getConnection());
+            ProtocolPackage pkg = protocolHandler.readPackage(player.getConnection());
 
             if (pkg.command == ProtocolCommand.SEND_MOVE) {
                 String[] arguments = pkg.arguments;
@@ -244,7 +244,8 @@ public class HoldEm {
                     case "match":
                         player.getPlayerData().bet(remaining);
                         player.getPlayerStatistics().addMatch();
-                        protocolHandler.sendPackage(ProtocolCommand.ACCEPTED_MOVE, new String[] {}, player.getConnection());
+                        protocolHandler.sendPackage(ProtocolCommand.ACCEPTED_MOVE, new String[] {},
+                                player.getConnection());
                         break;
                     case "check": {
                         if (remaining == 0) {
@@ -269,21 +270,24 @@ public class HoldEm {
                         } else {
                             player.getPlayerStatistics().addMatch();
                         }
-                        protocolHandler.sendPackage(ProtocolCommand.ACCEPTED_MOVE, new String[] {}, player.getConnection());
+                        protocolHandler.sendPackage(ProtocolCommand.ACCEPTED_MOVE, new String[] {},
+                                player.getConnection());
                         break;
                     }
                     case "fold": {
                         player.getPlayerData().setFolded(true);
                         choices--;
                         player.getPlayerStatistics().addFold();
-                        protocolHandler.sendPackage(ProtocolCommand.ACCEPTED_MOVE, new String[] {}, player.getConnection());
+                        protocolHandler.sendPackage(ProtocolCommand.ACCEPTED_MOVE, new String[] {},
+                                player.getConnection());
                         break;
                     }
                     default:
                         player.getPlayerData().setFolded(true);
                         choices--;
                         player.getPlayerStatistics().addFold();
-                        protocolHandler.sendPackage(ProtocolCommand.DENIED_MOVE, new String[] { "Unknown move: " + move },
+                        protocolHandler.sendPackage(ProtocolCommand.DENIED_MOVE,
+                                new String[] { "Unknown move: " + move },
                                 player.getConnection());
                         break;
                 }
@@ -367,7 +371,9 @@ public class HoldEm {
         if (done) {
             for (int i = players.size() - 1; i >= 0; i--) {
                 PokerPlayer player = players.get(i);
-                player.getPlayerStatistics().addHandLoss();
+                if (!winners.contains(player)) {
+                    player.getPlayerStatistics().addHandLoss();
+                }
                 if (player.getPlayerData().getMarkers() == 0) {
                     players.remove(i);
                     losers.add(player);
