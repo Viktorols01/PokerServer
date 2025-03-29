@@ -119,7 +119,7 @@ public class MenuFrame extends JFrame {
             JButton serverButton = new JButton("Create server");
             serverButton.addActionListener((e) -> {
                 try {
-                    PokerServer server = new PokerServer(getPort());
+                    PokerServer server = new PokerServer(getPort(), false);
                     new ServerFrame(server, 1200, 800);
                 } catch (IOException e1) {
                     JOptionPane.showMessageDialog(null, e1.getMessage() + " (" + getIP() + ", " + getPort() + ")",

@@ -1,6 +1,8 @@
+[] Fönsterstorlek för Elliots broke ass skärm
+
 [] Simplify use of getModel()
 
-[] You can only raise once? Not sure
+[] Make so you can only raise once? Not sure
 
 [] Handle people leaving
 

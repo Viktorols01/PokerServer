@@ -8,9 +8,9 @@ import protocol.ProtocolCommand;
 import protocol.ProtocolHandler;
 import protocol.ProtocolPackage;
 import tools.Broadcaster;
-import comms.ConnectionServer;
+import comms.Server;
 
-public class PokerServer extends ConnectionServer {
+public class PokerServer extends Server {
 
     private HoldEm game;
     private Thread gameThread;
@@ -18,11 +18,11 @@ public class PokerServer extends ConnectionServer {
 
     private ProtocolHandler protocolHandler;
 
-    public PokerServer(int port) throws IOException {
+    public PokerServer(int port, boolean verbose) throws IOException {
         super(port);
         this.game = new HoldEm(this);
         this.joinedSender = new Broadcaster();
-        this.protocolHandler = new ProtocolHandler("Server", true);
+        this.protocolHandler = new ProtocolHandler("Server", verbose);
     }
 
     public void startGame() {
