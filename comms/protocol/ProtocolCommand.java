@@ -1,0 +1,30 @@
+package protocol;
+
+public enum ProtocolCommand {
+    REQUEST_NAME,
+    SEND_NAME,
+
+    ACCEPTED_JOIN,
+    DENIED_JOIN,
+
+    REQUEST_TYPE,
+    SEND_TYPE,
+
+    ACCEPTED_TYPE,
+    DENIED_TYPE,
+
+    SEND_POKERSTATE,
+
+    REQUEST_CONTINUE,
+    SEND_CONTINUE,
+
+    REQUEST_MOVE,
+    SEND_MOVE,
+
+    ACCEPTED_MOVE,
+    DENIED_MOVE,
+
+    SEND_MESSAGE,
+
+    UNKNOWN_COMMAND;
+}

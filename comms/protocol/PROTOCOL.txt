@@ -1,0 +1,73 @@
+Protocol commands:
+    COMMAND
+        ARGUMENTS
+
+    REQUEST_NAME
+
+    SEND_NAME
+        (name)
+
+    ACCEPTED_JOIN
+
+    DENIED_JOIN
+        (reason)
+
+    REQUEST_TYPE
+
+    SEND_TYPE
+        (type)
+
+    ACCEPTED_TYPE
+
+    DENIED_TYPE
+        (reason)
+
+    SEND_POKERSTATE
+        (amount of players)
+            (name)
+            (markers)
+            (betted markers)
+            (blind)
+            (has player folded)
+            (is it this player's turn)
+            (is this player you)
+            (card 1)
+            (card 2)
+        (amount of community cards)
+            (community card)
+        (small blind)
+        (minimum bet)
+
+    REQUEST_CONTINUE
+
+    SEND_CONTINUE
+
+    REQUEST_MOVE
+
+    SEND_MOVE
+        (move)
+
+    ACCEPTED_MOVE
+
+    DENIED_MOVE
+        (reason)
+
+    SEND_MESSAGE
+        (message)
+
+    UNKNOWN_COMMAND
+
+
+String values:
+    blind: (none/small/big)
+    move: (match/check/raise/fold)
+
+Card codes:
+    (color)(value) OR none
+    Colors:
+    H - hearts
+    D - diamonds
+    S - spades
+    C - clubs
+    values:
+    (1-13)

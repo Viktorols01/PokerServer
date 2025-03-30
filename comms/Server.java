@@ -12,14 +12,14 @@ public abstract class Server {
     protected ServerSocket serversocket;
     protected int port;
     
-    protected List<Client> clients;
+    protected List<Connection> connections;
 
     protected Thread joinListener;
 
     public Server(int port) throws IOException {
         this.serversocket = new ServerSocket(port);
         this.port = port;
-        this.clients = new ArrayList<Client>();
+        this.connections = new ArrayList<Connection>();
 
     }
 
