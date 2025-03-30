@@ -6,14 +6,14 @@ import java.util.List;
 import java.util.Stack;
 
 import comms.Connection;
+import comms.protocol.ProtocolCommand;
+import comms.protocol.ProtocolHandler;
+import comms.protocol.ProtocolPackage;
 import poker.Card;
 import poker.CardCollection;
 import poker.Deck;
 import poker.HandRank;
 import poker.HoldEmModel;
-import protocol.ProtocolCommand;
-import protocol.ProtocolHandler;
-import protocol.ProtocolPackage;
 import tools.Broadcaster;
 
 public class HoldEm {

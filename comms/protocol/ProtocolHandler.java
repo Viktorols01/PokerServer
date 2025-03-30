@@ -1,4 +1,4 @@
-package protocol;
+package comms.protocol;
 
 import java.util.Stack;
 

@@ -3,10 +3,10 @@ package client;
 import javax.swing.JOptionPane;
 
 import comms.Connection;
+import comms.protocol.ProtocolCommand;
+import comms.protocol.ProtocolHandler;
+import comms.protocol.ProtocolPackage;
 import poker.HoldEmModel;
-import protocol.ProtocolCommand;
-import protocol.ProtocolHandler;
-import protocol.ProtocolPackage;
 
 public abstract class PokerClient {
     private Connection connection;

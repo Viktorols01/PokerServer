@@ -4,9 +4,9 @@ import java.io.IOException;
 
 import comms.Connection;
 import comms.Connection.Type;
-import protocol.ProtocolCommand;
-import protocol.ProtocolHandler;
-import protocol.ProtocolPackage;
+import comms.protocol.ProtocolCommand;
+import comms.protocol.ProtocolHandler;
+import comms.protocol.ProtocolPackage;
 import tools.Broadcaster;
 import comms.Server;
 

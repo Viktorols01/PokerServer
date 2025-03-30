@@ -73,7 +73,7 @@ public abstract class Server {
         return serversocket.getInetAddress();
     }
 
-    public List<Client> getConnections() {
-        return this.clients;
+    public List<Connection> getConnections() {
+        return this.connections;
     }
 }
